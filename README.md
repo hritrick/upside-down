@@ -24,12 +24,7 @@ A cooperative multiplayer browser game simulating the chaotic March 2020 lockdow
 
 ### Installation
 
-1. **Clone the repository**
-```bash
-cd "/Users/hritikpandey/Documents/Code/panic grocery run"
-```
-
-2. **Setup Backend**
+1. **Setup Backend**
 ```bash
 cd backend
 npm install
@@ -41,7 +36,7 @@ npm run dev
 
 Backend will run on `http://localhost:5000`
 
-3. **Setup Frontend** (in a new terminal)
+2. **Setup Frontend** (in a new terminal)
 ```bash
 cd frontend
 npm install
@@ -50,7 +45,7 @@ npm run dev
 
 Frontend will run on `http://localhost:3000`
 
-4. **Open your browser** to `http://localhost:3000`
+3. **Open your browser** to `http://localhost:3000`
 
 ## 🎨 Tech Stack
 
