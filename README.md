@@ -177,14 +177,8 @@ Perfect for:
 - Coding interviews prep
 - Cooperative problem-solving
 
-## 📝 License
-
-MIT
 
 ## 👥 Credits
 
-Built for the Lockdown Survivors of 2020 🧻
+Hritik Pandey - Jr. Webtech Officer
 
----
-
-**May your algorithms be efficient and your toilet paper plentiful!** 🎯
