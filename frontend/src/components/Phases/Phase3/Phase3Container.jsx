@@ -30,11 +30,11 @@ const Phase3Container = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-6"
             >
-                <h2 className="text-4xl font-bold text-panic mb-2">
-                    PHASE 3: THE CHAOS
+                <h2 className="text-4xl font-bold text-mindflayer mb-2" style={{ fontFamily: 'Bebas Neue, Space Mono, monospace' }}>
+                    PHASE 3: THE MIND FLAYER'S CHAOS
                 </h2>
-                <p className="text-terminal text-lg">
-                    Sort the panic-buying products by priority using <strong>Merge Sort or Quick Sort</strong>
+                <p className="text-eleven text-lg">
+                    Restore Eleven's Memory Fragments using <strong>Sorting Algorithm</strong>
                 </p>
             </motion.div>
 
@@ -43,15 +43,15 @@ const Phase3Container = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-void border-2 border-cyber p-4 mb-6"
+                className="bg-void border-2 border-mindflayer p-4 mb-6"
             >
-                <h3 className="text-cyber font-bold mb-2"> MISSION BRIEF:</h3>
+                <h3 className="text-mindflayer font-bold mb-2">MISSION BRIEF:</h3>
                 <ul className="text-gray-300 space-y-1 text-sm">
-                    <li>• 10 essential products are in chaotic disorder</li>
-                    <li>• Use any sorting algorithm to organize by priority</li>
-                    <li>• Higher priority = more essential (10 is highest)</li>
+                    <li>• Eleven's memories are scattered across the astral plane</li>
+                    <li>• Sort memory fragments chronologically to sever Mind Flayer's influence</li>
+                    <li>• Fragments are scrambled, shifting, and whispering</li>
                     <li>• Any correct sorting implementation will be accepted</li>
-                    <li>• <strong className="text-panic">Goal:</strong> Sort from highest priority (10) to lowest (1)</li>
+                    <li>• <strong className="text-eleven">Goal:</strong> Sort fragments chronologically (A-Z order)</li>
                 </ul>
             </motion.div>
 
@@ -89,9 +89,9 @@ const Phase3Container = () => {
                     animate={{ scale: 1 }}
                     className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50"
                 >
-                    <div className="bg-void border-4 border-terminal p-12 text-center" style={{ boxShadow: '0 0 50px rgba(0, 255, 65, 0.8)' }}>
-                        <h3 className="text-6xl font-bold text-terminal mb-4">✅ ORDER RESTORED!</h3>
-                        <p className="text-2xl text-cyber">Proceeding to Phase 4...</p>
+                    <div className="bg-void border-4 border-mindflayer p-12 text-center" style={{ boxShadow: '0 0 50px rgba(106, 13, 173, 0.8)' }}>
+                        <h3 className="text-6xl font-bold text-mindflayer mb-4">MEMORIES RESTORED!</h3>
+                        <p className="text-2xl text-eleven">Proceeding to Phase 4...</p>
                     </div>
                 </motion.div>
             )}

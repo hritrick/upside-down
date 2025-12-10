@@ -26,7 +26,7 @@ const CityGraph = ({ onSuccess = () => { } }) => {
     }, [showPath, graphData, onSuccess]);
 
     if (!graphData) {
-        return <div className="text-terminal text-center py-12">LOADING CITY MAP...</div>;
+        return <div className="text-gate text-center py-12">LOADING HAWKINS MAP...</div>;
     }
 
     const { nodes, edges, shortestPath } = graphData;
@@ -44,19 +44,19 @@ const CityGraph = ({ onSuccess = () => { } }) => {
     const scale = Math.min(scaleX, scaleY);
 
     return (
-        <div className="w-full h-full flex items-center justify-center bg-void border-2 border-terminal p-4 overflow-hidden" style={{ boxShadow: '0 0 20px rgba(0, 255, 65, 0.3)' }}>
+        <div className="w-full h-full flex items-center justify-center bg-void border-2 border-gate p-4 overflow-hidden" style={{ boxShadow: '0 0 20px rgba(139, 0, 0, 0.3)' }}>
             <svg
                 width="100%"
                 height="100%"
                 viewBox={`0 0 ${width} ${height}`}
                 preserveAspectRatio="xMidYMid meet"
-                className="border border-terminal border-opacity-30"
-                style={{ background: 'radial-gradient(circle, rgba(0,255,65,0.05) 0%, transparent 70%)', maxWidth: '100%', maxHeight: '100%' }}
+                className="border border-gate border-opacity-30"
+                style={{ background: 'radial-gradient(circle, rgba(139,0,0,0.08) 0%, transparent 70%)', maxWidth: '100%', maxHeight: '100%' }}
             >
                 {/* Grid Pattern */}
                 <defs>
                     <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,255,65,0.1)" strokeWidth="0.5" />
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(139,0,0,0.15)" strokeWidth="0.5" />
                     </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#grid)" />
@@ -81,7 +81,7 @@ const CityGraph = ({ onSuccess = () => { } }) => {
                                 y1={y1}
                                 x2={x2}
                                 y2={y2}
-                                stroke={isInPath ? '#00ff41' : '#00ff4140'}
+                                stroke={isInPath ? '#8B0000' : '#8B000060'}
                                 strokeWidth={isInPath ? 4 : 2}
                                 initial={{ pathLength: 0 }}
                                 animate={{ pathLength: 1 }}
@@ -92,7 +92,7 @@ const CityGraph = ({ onSuccess = () => { } }) => {
                             <text
                                 x={(x1 + x2) / 2}
                                 y={(y1 + y2) / 2}
-                                fill="#00ccff"
+                                fill="#FF69B4"
                                 fontSize="12"
                                 fontWeight="bold"
                                 textAnchor="middle"
@@ -112,7 +112,7 @@ const CityGraph = ({ onSuccess = () => { } }) => {
                             const y = node.y * scale + padding;
                             return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
                         }).join(' ')}
-                        stroke="#00ff41"
+                        stroke="#8B0000"
                         strokeWidth="6"
                         fill="none"
                         initial={{ pathLength: 0, opacity: 0 }}
@@ -147,8 +147,8 @@ const CityGraph = ({ onSuccess = () => { } }) => {
                                 cx={cx}
                                 cy={cy}
                                 r={isStart || isEnd ? 15 : 10}
-                                fill={isStart ? '#ff0055' : isEnd ? '#00ccff' : isInPath ? '#00ff41' : '#0a0a0a'}
-                                stroke={isStart ? '#ff0055' : isEnd ? '#00ccff' : '#00ff41'}
+                                fill={isStart ? '#8B0000' : isEnd ? '#FF69B4' : isInPath ? '#B22222' : '#0a0a0a'}
+                                stroke={isStart ? '#8B0000' : isEnd ? '#FF69B4' : '#8B0000'}
                                 strokeWidth={3}
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
@@ -166,7 +166,7 @@ const CityGraph = ({ onSuccess = () => { } }) => {
                                     cy={cy}
                                     r={15}
                                     fill="none"
-                                    stroke="#00ff41"
+                                    stroke="#8B0000"
                                     strokeWidth={2}
                                     initial={{ scale: 0, opacity: 1 }}
                                     animate={{ scale: 2, opacity: 0 }}
@@ -181,7 +181,7 @@ const CityGraph = ({ onSuccess = () => { } }) => {
                             <text
                                 x={cx}
                                 y={cy - 20}
-                                fill="#00ff41"
+                                fill="#8B0000"
                                 fontSize="12"
                                 fontWeight="bold"
                                 textAnchor="middle"

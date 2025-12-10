@@ -29,7 +29,7 @@ const ProductGrid = ({ sorted = false }) => {
     }, [sorted, products]);
 
     if (!products.length) {
-        return <div className="text-panic text-center py-12">LOADING PRODUCTS...</div>;
+        return <div className="text-mindflayer text-center py-12">LOADING MEMORY FRAGMENTS...</div>;
     }
 
     return (
@@ -59,30 +59,30 @@ const ProductGrid = ({ sorted = false }) => {
                             }}
                             className={`
                 p-4 border-2 relative
-                ${sorted ? 'border-terminal bg-terminal bg-opacity-10' : 'border-panic bg-panic bg-opacity-10'}
+                ${sorted ? 'border-mindflayer bg-mindflayer bg-opacity-10' : 'border-eleven bg-eleven bg-opacity-10'}
                 ${!sorted ? 'glitch-effect' : ''}
               `}
                         >
                             {/* Priority Badge */}
                             <div className={`
                 absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs
-                ${sorted ? 'bg-terminal text-void' : 'bg-panic text-white animate-pulse'}
+                ${sorted ? 'bg-mindflayer text-white' : 'bg-eleven text-void animate-pulse'}
               `}>
                                 {product.priority}
                             </div>
 
-                            {/* Product Info */}
+                            {/* Memory Info */}
                             <div className="text-center">
-                                <p className={`font-bold text-sm mb-1 ${sorted ? 'text-terminal' : 'text-panic'}`}>
+                                <p className={`font-bold text-sm mb-1 ${sorted ? 'text-mindflayer' : 'text-eleven'}`}>
                                     {product.name}
                                 </p>
                                 <p className="text-gray-400 text-xs">{product.category}</p>
                             </div>
 
-                            {/* Glitch overlay when unsorted */}
+                            {/* VHS static overlay when unsorted */}
                             {!sorted && (
                                 <motion.div
-                                    className="absolute inset-0 bg-panic opacity-10"
+                                    className="absolute inset-0 bg-mindflayer opacity-10"
                                     animate={{
                                         opacity: [0.1, 0.3, 0.1],
                                     }}
@@ -105,8 +105,8 @@ const ProductGrid = ({ sorted = false }) => {
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-6 text-center"
                 >
-                    <p className="text-terminal text-xl font-bold">
-                        ✅ PRODUCTS SORTED BY PRIORITY (HIGH TO LOW)
+                    <p className="text-mindflayer text-xl font-bold">
+                        MEMORY FRAGMENTS SORTED CHRONOLOGICALLY
                     </p>
                 </motion.div>
             )}

@@ -29,11 +29,11 @@ const Phase2Container = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-6"
             >
-                <h2 className="text-4xl font-bold text-cyber mb-2">
-                    PHASE 2: THE MAZE
+                <h2 className="text-4xl font-bold text-upside mb-2" style={{ fontFamily: 'Bebas Neue, Space Mono, monospace' }}>
+                    PHASE 2: THE LABYRINTH OF THE UPSIDE DOWN
                 </h2>
-                <p className="text-terminal text-lg">
-                    🌳 Navigate the store layout to find "Dry Ration" using <strong>DFS (Depth-First Search)</strong>
+                <p className="text-mindflayer text-lg">
+                    Navigate the twisted maze to find the <strong>Core Node</strong> where the hive-mind pulse is strongest
                 </p>
             </motion.div>
 
@@ -42,15 +42,15 @@ const Phase2Container = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-void border-2 border-terminal p-4 mb-6"
+                className="bg-void border-2 border-upside p-4 mb-6"
             >
-                <h3 className="text-terminal font-bold mb-2"> MISSION BRIEF:</h3>
+                <h3 className="text-upside font-bold mb-2">MISSION BRIEF:</h3>
                 <ul className="text-gray-300 space-y-1 text-sm">
-                    <li>• Navigate a tree with 7 store sections</li>
-                    <li>• Implement DFS to find the "Dry Ration" node</li>
-                    <li>• Track visited nodes to avoid cycles</li>
+                    <li>• You fell into the Upside Down version of the Starcourt basement</li>
+                    <li>• Implement DFS/BFS to find the Core Node</li>
+                    <li>• Vines cover the paths, making the layout disorienting</li>
                     <li>• Any correct algorithm implementation will be accepted</li>
-                    <li>• <strong className="text-cyber">Starting Point:</strong> Entrance (Root) → <strong className="text-yellow-400">Target:</strong> Dry Ration</li>
+                    <li>• <strong className="text-mindflayer">Starting Point:</strong> Collapsed Floor (Entrance) → <strong className="text-eleven">Target:</strong> Core Node</li>
                 </ul>
             </motion.div>
 
@@ -88,9 +88,9 @@ const Phase2Container = () => {
                     animate={{ scale: 1 }}
                     className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50"
                 >
-                    <div className="bg-void border-4 border-yellow-400 p-12 text-center" style={{ boxShadow: '0 0 50px rgba(255, 215, 0, 0.8)' }}>
-                        <h3 className="text-6xl font-bold text-yellow-400 mb-4">✅ DRY RATION FOUND!</h3>
-                        <p className="text-2xl text-cyber">Proceeding to Phase 3...</p>
+                    <div className="bg-void border-4 border-upside p-12 text-center" style={{ boxShadow: '0 0 50px rgba(74, 37, 17, 0.8)' }}>
+                        <h3 className="text-6xl font-bold text-upside mb-4">CORE NODE LOCATED!</h3>
+                        <p className="text-2xl text-mindflayer">Proceeding to Phase 3...</p>
                     </div>
                 </motion.div>
             )}

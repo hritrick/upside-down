@@ -35,11 +35,14 @@ const Home = () => {
                     animate={{ y: 0 }}
                     className="text-center mb-12"
                 >
-                    <h1 className="text-7xl font-bold text-terminal mb-4 tracking-wider" style={{ textShadow: '0 0 20px #00ff41' }}>
-                        PANIC GROCERY RUN
+                    <h1 className="text-7xl font-bold text-gate mb-4 tracking-wider" style={{ textShadow: '0 0 20px #8B0000', fontFamily: 'Bebas Neue, Space Mono, monospace' }}>
+                        STRANGER THINGS
                     </h1>
-                    <p className="text-2xl text-cyber">
-                        March 2020 Lockdown Challenge
+                    <h2 className="text-4xl text-eleven mb-2" style={{ fontFamily: 'Bebas Neue, Space Mono, monospace' }}>
+                        THE ALGORITHM HUNT
+                    </h2>
+                    <p className="text-2xl text-mindflayer">
+                        Close the Gate Before It's Too Late
                     </p>
                     <p className="text-lg text-gray-400 mt-2">
                         A Cooperative Algorithm Game for 2 Players
@@ -51,30 +54,30 @@ const Home = () => {
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-void border-2 border-terminal p-8"
-                    style={{ boxShadow: '0 0 30px rgba(0, 255, 65, 0.3)' }}
+                    className="bg-void border-2 border-gate p-8"
+                    style={{ boxShadow: '0 0 30px rgba(139, 0, 0, 0.3)' }}
                 >
                     {/* Player Inputs */}
                     <div className="space-y-6 mb-8">
                         <div>
-                            <label className="block text-terminal mb-2 font-bold">PLAYER 1 NAME</label>
+                            <label className="block text-gate mb-2 font-bold">PLAYER 1 NAME</label>
                             <input
                                 type="text"
                                 value={player1}
                                 onChange={(e) => setPlayer1(e.target.value)}
                                 placeholder="Enter name..."
-                                className="w-full bg-void border-2 border-terminal text-terminal px-4 py-3 focus:outline-none focus:border-terminal-light transition-colors"
+                                className="w-full bg-void border-2 border-gate text-gate px-4 py-3 focus:outline-none focus:border-gate-light transition-colors"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-cyber mb-2 font-bold">PLAYER 2 NAME</label>
+                            <label className="block text-mindflayer mb-2 font-bold">PLAYER 2 NAME</label>
                             <input
                                 type="text"
                                 value={player2}
                                 onChange={(e) => setPlayer2(e.target.value)}
                                 placeholder="Enter name..."
-                                className="w-full bg-void border-2 border-cyber text-cyber px-4 py-3 focus:outline-none focus:border-cyber-light transition-colors"
+                                className="w-full bg-void border-2 border-mindflayer text-mindflayer px-4 py-3 focus:outline-none focus:border-mindflayer-light transition-colors"
                             />
                         </div>
                     </div>
@@ -90,7 +93,7 @@ const Home = () => {
                     {/* Rules Toggle */}
                     <button
                         onClick={() => setShowRules(!showRules)}
-                        className="w-full text-center text-cyber hover:text-cyber-light transition-colors mb-4"
+                        className="w-full text-center text-mindflayer hover:text-mindflayer-light transition-colors mb-4"
                     >
                         {showRules ? '▼ HIDE RULES' : '▶ VIEW RULES'}
                     </button>
@@ -100,27 +103,27 @@ const Home = () => {
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
-                            className="border-2 border-cyber p-6 space-y-4 text-sm"
+                            className="border-2 border-mindflayer p-6 space-y-4 text-sm"
                         >
-                            <h3 className="text-cyber font-bold text-lg mb-3"> MISSION BRIEFING</h3>
+                            <h3 className="text-mindflayer font-bold text-lg mb-3">MISSION BRIEFING</h3>
 
                             <div className="space-y-3 text-gray-300">
-                                <p><strong className="text-terminal">🎯 OBJECTIVE:</strong> Complete 4 algorithm challenges to find the Price Key and escape with groceries.</p>
+                                <p><strong className="text-gate">OBJECTIVE:</strong> Complete 4 algorithm challenges to find the Memory Key and close the Gate to the Upside Down.</p>
 
-                                <p><strong className="text-terminal">⏱️ TIME LIMIT:</strong> 20:00 minutes for all 4 phases.</p>
+                                <p><strong className="text-gate">TIME LIMIT:</strong> 20:00 minutes for all 4 phases.</p>
 
-                                <p><strong className="text-terminal">👥 GAMEPLAY:</strong> Local multiplayer - players alternate after each phase.</p>
+                                <p><strong className="text-gate">GAMEPLAY:</strong> Local multiplayer - players alternate after each phase.</p>
 
                                 <div className="pl-4 space-y-2">
-                                    <p><strong className="text-cyber">Phase 1:</strong> Find shortest route to store (Dijkstra's Algorithm)</p>
-                                    <p><strong className="text-cyber">Phase 2:</strong> Navigate store layout to Dry Rations (DFS)</p>
-                                    <p><strong className="text-cyber">Phase 3:</strong> Sort panic-buying products by priority (Sorting)</p>
-                                    <p><strong className="text-cyber">Phase 4:</strong> Find "Maggi" in shelves, collect prices (Binary Search)</p>
+                                    <p><strong className="text-mindflayer">Phase 1:</strong> Escape the Gate - Find shortest route from Mike's House to Starcourt Basement (Dijkstra's Algorithm)</p>
+                                    <p><strong className="text-mindflayer">Phase 2:</strong> Navigate the Upside Down Maze to find the Core Node (DFS/BFS)</p>
+                                    <p><strong className="text-mindflayer">Phase 3:</strong> Restore Eleven's Memory Fragments by sorting them chronologically (Sorting)</p>
+                                    <p><strong className="text-mindflayer">Phase 4:</strong> Find "Mom" memory to close the Gate, track psychic energy cost (Binary Search)</p>
                                 </div>
 
-                                <p><strong className="text-panic">🔑 VICTORY:</strong> Submit correct Price Key (concatenated prices from Phase 4)</p>
+                                <p><strong className="text-eleven">VICTORY:</strong> Submit correct Energy Key (concatenated energy costs from Phase 4)</p>
 
-                                <p><strong className="text-terminal"> CODE:</strong> Write algorithm code in Python, C, C++, Java, or JavaScript</p>
+                                <p><strong className="text-gate">CODE:</strong> Write algorithm code in Python, C, C++, Java, or JavaScript</p>
                             </div>
                         </motion.div>
                     )}
@@ -138,7 +141,7 @@ const Home = () => {
 
                 {/* Footer */}
                 <p className="text-center text-gray-500 mt-8">
-                    Brought to you by the Lockdown Survivors of 2020
+                    For Hawkins. For Eleven. For the world above.
                 </p>
             </motion.div>
         </div>

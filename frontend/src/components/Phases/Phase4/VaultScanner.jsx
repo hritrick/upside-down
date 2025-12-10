@@ -57,9 +57,9 @@ const VaultScanner = ({ onPriceCollected, codeValidated }) => {
     };
 
     return (
-        <div className="w-full h-full p-6 bg-void border-2 border-cyber" style={{ boxShadow: '0 0 20px rgba(0, 204, 255, 0.3)' }}>
-            <h3 className="text-cyber text-2xl font-bold mb-6 text-center">
-                🗄️ VAULT SCANNER SYSTEM
+        <div className="w-full h-full p-6 bg-void border-2 border-mindflayer" style={{ boxShadow: '0 0 20px rgba(106, 13, 173, 0.3)' }}>
+            <h3 className="text-mindflayer text-2xl font-bold mb-6 text-center">
+                MEMORY SCANNER SYSTEM
             </h3>
 
             <div className="grid grid-cols-4 gap-4">
@@ -77,9 +77,9 @@ const VaultScanner = ({ onPriceCollected, codeValidated }) => {
                 relative p-6 border-2 transition-all duration-300
                 ${isChecked
                                     ? isMaggi
-                                        ? 'bg-yellow-400 bg-opacity-20 border-yellow-400 cursor-default'
-                                        : 'bg-cyber bg-opacity-20 border-cyber cursor-default'
-                                    : 'bg-gray-900 border-gray-700 hover:border-cyber hover:bg-gray-800 cursor-pointer'
+                                        ? 'bg-eleven bg-opacity-20 border-eleven cursor-default'
+                                        : 'bg-mindflayer bg-opacity-20 border-mindflayer cursor-default'
+                                    : 'bg-gray-900 border-gray-700 hover:border-mindflayer hover:bg-gray-800 cursor-pointer'
                                 }
                 ${isScanning ? 'animate-pulse' : ''}
               `}
@@ -101,7 +101,7 @@ const VaultScanner = ({ onPriceCollected, codeValidated }) => {
                             {!codeValidated && !isChecked && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-90">
                                     <div className="text-center">
-                                        <div className="text-4xl mb-2">🔒</div>
+                                        <div className="text-4xl mb-2">LOCKED</div>
                                         <div className="text-gray-500 text-xs">LOCKED</div>
                                     </div>
                                 </div>
@@ -112,9 +112,9 @@ const VaultScanner = ({ onPriceCollected, codeValidated }) => {
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="absolute inset-0 flex items-center justify-center bg-cyber bg-opacity-10"
+                                    className="absolute inset-0 flex items-center justify-center bg-mindflayer bg-opacity-10"
                                 >
-                                    <div className="text-cyber font-bold">SCANNING...</div>
+                                    <div className="text-mindflayer font-bold">SCANNING...</div>
                                 </motion.div>
                             )}
 
@@ -128,20 +128,20 @@ const VaultScanner = ({ onPriceCollected, codeValidated }) => {
                                     >
                                         <div className={`
                       text-center font-bold
-                      ${isMaggi ? 'text-yellow-400' : 'text-cyber'}
+                      ${isMaggi ? 'text-eleven' : 'text-mindflayer'}
                     `}>
                                             {isMaggi && <div className="text-2xl mb-2">🎯</div>}
                                             <div className="text-sm mb-2">{shelf.item}</div>
-                                            <div className="text-2xl">₹{shelf.price}</div>
+                                            <div className="text-2xl">⚡{shelf.price}</div>
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            {/* Glow effect for Maggi */}
+                            {/* Glow effect for Mom */}
                             {isChecked && isMaggi && (
                                 <motion.div
-                                    className="absolute inset-0 border-4 border-yellow-400 pointer-events-none"
+                                    className="absolute inset-0 border-4 border-eleven pointer-events-none"
                                     animate={{
                                         opacity: [0.5, 1, 0.5]
                                     }}
@@ -159,16 +159,16 @@ const VaultScanner = ({ onPriceCollected, codeValidated }) => {
             {/* Instructions */}
             <div className="mt-6 mb-4 text-center text-gray-400 text-sm min-h-[80px] flex items-center justify-center mt-0">
                 {!codeValidated ? (
-                    <p className="text-panic font-bold text-base">
-                        🔒 Submit valid Binary Search code to unlock shelf scanning
+                    <p className="text-gate font-bold text-base">
+                        Submit valid Binary Search code to unlock memory scanning
                     </p>
                 ) : foundMaggi ? (
-                    <p className="text-yellow-400 font-bold text-base">
-                        🎯 MAGGI FOUND! Continue binary search if needed, then submit the Price Key below.
+                    <p className="text-eleven font-bold text-base">
+                        "MOM" MEMORY FOUND! Continue binary search if needed, then submit the Energy Key below.
                     </p>
                 ) : (
                     <p>
-                        Click shelves to scan. Use <strong className="text-cyber">Binary Search</strong> to find "Maggi" efficiently.
+                        Click memory fragments to scan. Use <strong className="text-mindflayer">Binary Search</strong> to find "Mom" efficiently.
                     </p>
                 )}
             </div>

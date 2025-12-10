@@ -37,11 +37,11 @@ const Phase4Container = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-6"
             >
-                <h2 className="text-4xl font-bold text-cyber mb-2">
-                    PHASE 4: THE HUNT FOR MAGGI
+                <h2 className="text-4xl font-bold text-eleven mb-2" style={{ fontFamily: 'Bebas Neue, Space Mono, monospace' }}>
+                    PHASE 4: THE HUNT FOR THE KEY MEMORY
                 </h2>
-                <p className="text-terminal text-lg">
-                    🔍 Find "Maggi" using <strong>Binary Search</strong>, collect prices, and submit the Price Key
+                <p className="text-mindflayer text-lg">
+                    Find "Mom" memory using <strong>Binary Search</strong>, collect energy costs, and submit the Energy Key
                 </p>
             </motion.div>
 
@@ -50,16 +50,16 @@ const Phase4Container = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-void border-2 border-terminal p-4 mb-6"
+                className="bg-void border-2 border-mindflayer p-4 mb-6"
             >
-                <h3 className="text-terminal font-bold mb-2"> MISSION BRIEF:</h3>
+                <h3 className="text-mindflayer font-bold mb-2">MISSION BRIEF:</h3>
                 <ul className="text-gray-300 space-y-1 text-sm">
-                    <li>• 12 shelves arranged alphabetically by item name</li>
-                    <li>• Implement Binary Search to find "Maggi" efficiently</li>
-                    <li>• Record prices from each shelf you check</li>
-                    <li>• Price Key = concatenation of all prices in order checked</li>
-                    <li>• <strong className="text-cyber">Victory Condition:</strong> Click shelves to collect prices, then submit the concatenated Price Key</li>
-                    <li>• <strong className="text-yellow-400">Tip:</strong> The correct binary search path is: shelves 5 → 8 → 10 → 11</li>
+                    <li>• 12 memory fragments arranged alphabetically</li>
+                    <li>• Implement Binary Search to find "Mom" memory efficiently</li>
+                    <li>• Each touched memory drains psychic energy</li>
+                    <li>• Energy Key = concatenation of all energy costs in order touched</li>
+                    <li>• <strong className="text-eleven">Victory Condition:</strong> Click memories to collect energy costs, then submit the Energy Key</li>
+                    <li>• <strong className="text-gate">Warning:</strong> Eleven's memories are fragile - touching them drains psychic energy</li>
                 </ul>
             </motion.div>
 

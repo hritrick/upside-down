@@ -25,7 +25,7 @@ const StoreTree = ({ onSuccess = () => { } }) => {
     }, [showPath, treeData, onSuccess]);
 
     if (!treeData) {
-        return <div className="text-cyber text-center py-12">LOADING STORE LAYOUT...</div>;
+        return <div className="text-upside text-center py-12">LOADING UPSIDE DOWN MAZE...</div>;
     }
 
     const { nodes, targetNode, dfsPath } = treeData;
@@ -43,22 +43,22 @@ const StoreTree = ({ onSuccess = () => { } }) => {
     const scale = Math.min(scaleX, scaleY);
 
     return (
-        <div className="w-full h-full flex items-center justify-center bg-void border-2 border-cyber p-4 overflow-hidden" style={{ boxShadow: '0 0 20px rgba(0, 204, 255, 0.3)' }}>
+        <div className="w-full h-full flex items-center justify-center bg-void border-2 border-upside p-4 overflow-hidden" style={{ boxShadow: '0 0 20px rgba(74, 37, 17, 0.3)' }}>
             <svg
                 width="100%"
                 height="100%"
                 viewBox={`0 0 ${width} ${height}`}
                 preserveAspectRatio="xMidYMid meet"
-                className="border border-cyber border-opacity-30"
-                style={{ background: 'linear-gradient(135deg, rgba(0,204,255,0.05), rgba(0,153,204,0.02))', maxWidth: '100%', maxHeight: '100%' }}
+                className="border border-upside border-opacity-30"
+                style={{ background: 'linear-gradient(135deg, rgba(74,37,17,0.1), rgba(106,13,173,0.05))', maxWidth: '100%', maxHeight: '100%' }}
             >
-                {/* Blueprint grid */}
+                {/* Organic pattern */}
                 <defs>
-                    <pattern id="blueprint-grid" width="30" height="30" patternUnits="userSpaceOnUse">
-                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(0,204,255,0.15)" strokeWidth="1" />
+                    <pattern id="organic-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(74,37,17,0.2)" strokeWidth="1" />
                     </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#blueprint-grid)" />
+                <rect width="100%" height="100%" fill="url(#organic-grid)" />
 
                 {/* Connections (edges) */}
                 {nodes.filter(n => n.parent !== null).map((node) => {
@@ -79,7 +79,7 @@ const StoreTree = ({ onSuccess = () => { } }) => {
                             y1={y1}
                             x2={x2}
                             y2={y2}
-                            stroke={isInPath ? '#FFD700' : '#00ccff60'}
+                            stroke={isInPath ? '#6A0DAD' : '#4A251160'}
                             strokeWidth={isInPath ? 4 : 2}
                             strokeDasharray={isInPath ? '0' : '5,5'}
                             initial={{ pathLength: 0 }}
@@ -98,19 +98,19 @@ const StoreTree = ({ onSuccess = () => { } }) => {
                             const y = node.y * scale + padding;
                             return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
                         }).join(' ')}
-                        stroke="#FFD700"
+                        stroke="#6A0DAD"
                         strokeWidth="6"
                         fill="none"
                         initial={{ pathLength: 0, opacity: 0 }}
                         animate={{ pathLength: 1, opacity: 1 }}
                         transition={{ duration: 2, ease: 'easeInOut' }}
-                        filter="url(#golden-glow)"
+                        filter="url(#purple-glow)"
                     />
                 )}
 
-                {/* Golden Glow Filter */}
+                {/* Purple Glow Filter */}
                 <defs>
-                    <filter id="golden-glow">
+                    <filter id="purple-glow">
                         <feGaussianBlur stdDeviation="4" result="coloredBlur" />
                         <feMerge>
                             <feMergeNode in="coloredBlur" />
@@ -129,14 +129,14 @@ const StoreTree = ({ onSuccess = () => { } }) => {
 
                     return (
                         <g key={node.id}>
-                            {/* Node rect (blueprint box) */}
+                            {/* Node rect (organic irregular) */}
                             <motion.rect
                                 x={cx - 30}
                                 y={cy - 15}
                                 width={60}
                                 height={30}
-                                fill={isTarget ? '#FFD70020' : isEntrance ? '#ff005520' : '#00ccff10'}
-                                stroke={isTarget ? '#FFD700' : isEntrance ? '#ff0055' : isInPath ? '#FFD700' : '#00ccff'}
+                                fill={isTarget ? '#6A0DAD20' : isEntrance ? '#8B000020' : '#4A251110'}
+                                stroke={isTarget ? '#6A0DAD' : isEntrance ? '#8B0000' : isInPath ? '#6A0DAD' : '#4A2511'}
                                 strokeWidth={2}
                                 rx={2}
                                 initial={{ scale: 0 }}
@@ -147,14 +147,14 @@ const StoreTree = ({ onSuccess = () => { } }) => {
                                 }}
                             />
 
-                            {/* Thermal "heat" effect for path nodes */}
+                            {/* Pulsing effect for path nodes */}
                             {isInPath && !isTarget && (
                                 <motion.circle
                                     cx={cx}
                                     cy={cy}
                                     r={20}
                                     fill="none"
-                                    stroke="#FFD700"
+                                    stroke="#6A0DAD"
                                     strokeWidth={2}
                                     initial={{ scale: 0, opacity: 1 }}
                                     animate={{ scale: 1.5, opacity: 0 }}
@@ -175,7 +175,7 @@ const StoreTree = ({ onSuccess = () => { } }) => {
                                         width={70}
                                         height={40}
                                         fill="none"
-                                        stroke="#FFD700"
+                                        stroke="#6A0DAD"
                                         strokeWidth={3}
                                         rx={4}
                                         initial={{ scale: 0 }}
@@ -188,12 +188,12 @@ const StoreTree = ({ onSuccess = () => { } }) => {
                                     <text
                                         x={cx}
                                         y={cy - 35}
-                                        fill="#FFD700"
+                                        fill="#6A0DAD"
                                         fontSize="14"
                                         fontWeight="bold"
                                         textAnchor="middle"
                                     >
-                                        🎯 TARGET
+                                        CORE NODE
                                     </text>
                                 </>
                             )}
@@ -202,7 +202,7 @@ const StoreTree = ({ onSuccess = () => { } }) => {
                             <text
                                 x={cx}
                                 y={cy + 5}
-                                fill={isTarget ? '#FFD700' : isInPath ? '#FFD700' : '#00ccff'}
+                                fill={isTarget ? '#6A0DAD' : isInPath ? '#6A0DAD' : '#4A2511'}
                                 fontSize="11"
                                 fontWeight="bold"
                                 textAnchor="middle"
