@@ -16,6 +16,8 @@ function GameCanvas() {
         playerRole,
         currentPhase,
         timerSeconds,
+        glitchActive,
+        stressLevel,
         updateTimer,
         setPhase,
         setPartnerDisconnected
@@ -74,11 +76,26 @@ function GameCanvas() {
             navigate('/');
         });
 
+        // Listen for glitch events (Mind Flayer's Interference)
+        socket.on('glitch_event', ({ duration }) => {
+            const { playerRole, activateGlitch, deactivateGlitch } = useGameStore.getState();
+
+            if (playerRole === 'A') {
+                console.log('⚡ Glitch activated for Player A');
+                activateGlitch();
+                setTimeout(() => {
+                    deactivateGlitch();
+                    console.log('⚡ Glitch deactivated');
+                }, duration);
+            }
+        });
+
         return () => {
             socket.off('timer_update');
             socket.off('answer_result');
             socket.off('time_up');
             socket.off('partner_disconnected');
+            socket.off('glitch_event');
         };
     }, [socket, teamCode, playerRole, navigate, updateTimer, setPhase, setPartnerDisconnected]);
 
@@ -170,31 +187,66 @@ function GameCanvas() {
             </AnimatePresence>
 
             {/* Top Bar */}
-            <div className="bg-black/80 border-b-2 border-gate p-4 flex justify-between items-center sticky top-0 z-40">
-                <div className="flex items-center gap-4">
-                    <div className="text-gate font-mono text-xl">
-                        PHASE <span className="text-3xl font-bold">{currentPhase}</span>/4
-                    </div>
-                    <div className="text-mindflayer font-mono text-sm">
-                        {playerRole === 'A' ? 'THE EYES' : 'THE BRAIN'}
-                    </div>
+            <div className="bg-black/80 border-b-2 border-gate sticky top-0 z-40">
+                {/* Stress Bar (Mind Flayer's Interference) */}
+                <div className="h-2 bg-black/50 relative overflow-hidden">
+                    <motion.div
+                        className="h-full bg-gradient-to-r from-gate to-red-600"
+                        style={{ width: `${stressLevel}%` }}
+                        animate={{
+                            boxShadow: stressLevel > 50
+                                ? ['0 0 5px #8B0000', '0 0 15px #ff0000', '0 0 5px #8B0000']
+                                : '0 0 5px #8B0000'
+                        }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                    />
+                    {stressLevel > 0 && (
+                        <div className="absolute top-0 right-2 text-[10px] text-white font-mono">
+                            STRESS: {stressLevel}%
+                        </div>
+                    )}
                 </div>
 
-                <motion.div
-                    animate={{
-                        color: timerSeconds < 60 ? '#ff0000' : '#6A0DAD'
-                    }}
-                    className="font-mono text-3xl font-bold tracking-wider"
-                    style={{
-                        textShadow: timerSeconds < 60 ? '0 0 10px #ff0000' : '0 0 10px #6A0DAD'
-                    }}
-                >
-                    {formatTime(timerSeconds)}
-                </motion.div>
+                <div className="p-4 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        <div className="text-gate font-mono text-xl">
+                            PHASE <span className="text-3xl font-bold">{currentPhase}</span>/4
+                        </div>
+                        <div className="text-mindflayer font-mono text-sm">
+                            {playerRole === 'A' ? 'THE EYES' : 'THE BRAIN'}
+                        </div>
+                        {glitchActive && playerRole === 'A' && (
+                            <motion.div
+                                animate={{ opacity: [1, 0.5, 1] }}
+                                transition={{ duration: 0.3, repeat: Infinity }}
+                                className="text-red-500 font-mono text-sm font-bold"
+                            >
+                                ⚡ INTERFERENCE
+                            </motion.div>
+                        )}
+                    </div>
+
+                    <motion.div
+                        animate={{
+                            color: timerSeconds < 60 ? '#ff0000' : '#6A0DAD'
+                        }}
+                        className="font-mono text-3xl font-bold tracking-wider"
+                        style={{
+                            textShadow: timerSeconds < 60 ? '0 0 10px #ff0000' : '0 0 10px #6A0DAD'
+                        }}
+                    >
+                        {formatTime(timerSeconds)}
+                    </motion.div>
+                </div>
             </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto p-8">
+            {/* Main Content Area - Apply glitch effect to Player A */}
+            <div
+                className={`flex-1 overflow-y-auto p-8 transition-all duration-300 ${glitchActive && playerRole === 'A'
+                        ? 'blur-sm grayscale hue-rotate-90'
+                        : ''
+                    }`}
+            >
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentPhase}

@@ -14,6 +14,10 @@ const useGameStore = create((set) => ({
     isConnected: false,
     partnerConnected: false,
 
+    // Hard Mode: Mind Flayer's Interference
+    glitchActive: false,
+    stressLevel: 0, // 0-100, increases with each glitch
+
     // Actions
     setTeamInfo: (teamCode, playerRole) => set({
         teamCode,
@@ -47,6 +51,14 @@ const useGameStore = create((set) => ({
         partnerConnected: false
     }),
 
+    // Glitch Actions
+    activateGlitch: () => set((state) => ({
+        glitchActive: true,
+        stressLevel: Math.min(100, state.stressLevel + 15)
+    })),
+
+    deactivateGlitch: () => set({ glitchActive: false }),
+
     resetGame: () => set({
         teamCode: null,
         playerRole: null,
@@ -54,8 +66,11 @@ const useGameStore = create((set) => ({
         timerSeconds: 1200,
         status: 'idle',
         isConnected: false,
-        partnerConnected: false
+        partnerConnected: false,
+        glitchActive: false,
+        stressLevel: 0
     })
 }));
 
 export default useGameStore;
+

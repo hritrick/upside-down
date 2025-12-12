@@ -1,67 +1,58 @@
 import { motion } from 'framer-motion';
 
-const memoryTable = [
-    { address: '101', data: 'H', next: '505' },
-    { address: '505', data: 'E', next: '202' },
-    { address: '202', data: 'L', next: '909' },
-    { address: '909', data: 'P', next: 'NULL' }
-];
-
 function Phase3({ playerRole }) {
-    if (playerRole === 'A') {
-        // THE EYES - Display Memory Address Table
-        return (
-            <div className="max-w-5xl mx-auto">
-                <motion.h2
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-gate mb-8 text-center tracking-wider"
-                    style={{ fontFamily: 'serif' }}
-                >
-                    THE HIVE MIND
-                </motion.h2>
+    // Process-Resource Graph
+    const processes = [
+        { id: 1, holds: 'R1', waits: 'R2' },
+        { id: 2, holds: 'R2', waits: 'R3' },
+        { id: 3, holds: 'R3', waits: 'R1' },
+        { id: 4, holds: 'R4', waits: 'R2' }, // Distractor - not in cycle
+    ];
 
-                <div className="bg-black border-4 border-gate p-8 rounded-lg">
-                    <div className="text-gate text-xl font-mono mb-6 text-center">
-                        🧠 MEMORY STRUCTURE
+    return (
+        <div className="min-h-full">
+            <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-5xl font-bold text-gate mb-8 text-center tracking-wider"
+                style={{ fontFamily: 'serif' }}
+            >
+                THE MEMORY LEAK
+            </motion.h2>
+
+            {playerRole === 'A' ? (
+                // Player A: The Eyes - Sees the Process-Resource Table
+                <div className="space-y-8 max-w-4xl mx-auto">
+                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
+                        💾 RESOURCE ALLOCATION TABLE
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full font-mono">
+                    <div className="bg-black/60 border-4 border-gate p-8 rounded-lg">
+                        <table className="w-full text-center font-mono">
                             <thead>
-                                <tr className="border-b-2 border-mindflayer">
-                                    <th className="px-6 py-4 text-left text-mindflayer text-lg">Address</th>
-                                    <th className="px-6 py-4 text-left text-mindflayer text-lg">Data</th>
-                                    <th className="px-6 py-4 text-left text-mindflayer text-lg">Next</th>
+                                <tr className="border-b-2 border-gate">
+                                    <th className="text-2xl text-green-500 p-4">PROCESS</th>
+                                    <th className="text-2xl text-yellow-500 p-4">HOLDS</th>
+                                    <th className="text-2xl text-red-500 p-4">WAITS FOR</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {memoryTable.map((node, index) => (
+                                {processes.map((proc, index) => (
                                     <motion.tr
-                                        key={node.address}
-                                        initial={{ opacity: 0, x: -30 }}
+                                        key={proc.id}
+                                        initial={{ opacity: 0, x: -50 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.2 }}
-                                        className="border-b border-gate/30 hover:bg-gate/10 transition-colors group"
+                                        transition={{ delay: index * 0.15 }}
+                                        className="border-b border-gray-700"
                                     >
-                                        <td className="px-6 py-4">
-                                            <span className="text-gate text-xl font-bold">
-                                                {node.address}
-                                            </span>
+                                        <td className="text-4xl text-green-500 p-6 font-bold">
+                                            P{proc.id}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-white text-2xl font-bold group-hover:text-eleven transition-colors">
-                                                '{node.data}'
-                                            </span>
+                                        <td className="text-4xl text-yellow-500 p-6">
+                                            {proc.holds}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            {node.next === 'NULL' ? (
-                                                <span className="text-gray-500 text-xl">NULL</span>
-                                            ) : (
-                                                <span className="text-mindflayer text-xl">
-                                                    → {node.next}
-                                                </span>
-                                            )}
+                                        <td className="text-4xl text-red-500 p-6">
+                                            {proc.waits}
                                         </td>
                                     </motion.tr>
                                 ))}
@@ -69,95 +60,91 @@ function Phase3({ playerRole }) {
                         </table>
                     </div>
 
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1 }}
-                        className="mt-6 text-center text-green-500 font-mono"
-                    >
-                        HEAD → 101
-                    </motion.div>
-                </div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.2 }}
-                    className="mt-8 text-center text-mindflayer font-mono text-lg"
-                >
-                    📡 Share this memory structure with your partner
-                </motion.div>
-            </div>
-        );
-    } else {
-        // THE BRAIN - Display Linked List Traversal Instructions
-        return (
-            <div className="max-w-4xl mx-auto">
-                <motion.h2
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-mindflayer mb-8 text-center tracking-wider"
-                    style={{ fontFamily: 'serif' }}
-                >
-                    THE HIVE MIND
-                </motion.h2>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-black border-4 border-mindflayer p-8 rounded-lg font-mono shadow-[0_0_30px_#6A0DAD]"
-                >
-                    <div className="text-mindflayer text-xl mb-6">
-                        <span className="text-gate">▸</span> CODE INSTRUCTION
-                    </div>
-
-                    <div className="space-y-6 text-white text-lg">
-                        <motion.div
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                            className="bg-mindflayer/20 border-l-4 border-mindflayer p-4"
-                        >
-                            <div className="text-green-500 mb-2">// Start traversal</div>
-                            <div>Start at <span className="text-gate font-bold">Head (101)</span></div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.7 }}
-                            className="bg-gate/20 border-l-4 border-gate p-4"
-                        >
-                            <div className="text-red-500 mb-2 font-bold">⚠️ ERROR DETECTED</div>
-                            <div>Skip/Delete node at Address <span className="text-gate font-bold">505</span></div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.9 }}
-                            className="bg-eleven/20 border-l-4 border-eleven p-4"
-                        >
-                            <div className="text-green-500 mb-2">// Decode output</div>
-                            <div>Traverse remaining nodes → Decode the string</div>
-                        </motion.div>
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1.2 }}
-                        className="mt-8 pt-6 border-t border-mindflayer/50"
-                    >
-                        <div className="text-green-500 text-sm">
-                            &gt; Submit decoded string (uppercase)
+                    <div className="grid grid-cols-2 gap-4 text-center font-mono">
+                        <div className="bg-green-500/20 border-2 border-green-500 p-4 rounded">
+                            <div className="text-green-500 text-lg mb-2">PROCESS</div>
+                            <div className="text-sm text-gray-400">Running program</div>
                         </div>
-                    </motion.div>
-                </motion.div>
-            </div>
-        );
-    }
+                        <div className="bg-yellow-500/20 border-2 border-yellow-500 p-4 rounded">
+                            <div className="text-yellow-500 text-lg mb-2">HOLDS</div>
+                            <div className="text-sm text-gray-400">Resource currently locked</div>
+                        </div>
+                        <div className="bg-red-500/20 border-2 border-red-500 p-4 rounded col-span-2">
+                            <div className="text-red-500 text-lg mb-2">WAITS FOR</div>
+                            <div className="text-sm text-gray-400">Resource needed to proceed</div>
+                        </div>
+                    </div>
+
+                    <div className="text-center text-gray-400 font-mono">
+                        ⚠️ DESCRIBE THE DEPENDENCY CHAIN TO YOUR PARTNER
+                    </div>
+                </div>
+            ) : (
+                // Player B: The Brain - Gets the Cycle Detection Formula
+                <div className="space-y-8 max-w-3xl mx-auto">
+                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
+                        🧠 DEADLOCK DETECTION PROTOCOL
+                    </div>
+
+                    <div className="bg-black/60 border-4 border-red-500 p-8 rounded-lg">
+                        <div className="text-3xl text-red-500 font-bold mb-6 text-center font-mono">
+                            ⚠️ SYSTEM DEADLOCK DETECTED
+                        </div>
+                        <div className="text-gray-300 text-lg font-mono text-center">
+                            One or more processes are in a circular wait state
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 text-white font-mono">
+                        <div className="bg-mindflayer/20 p-6 rounded-lg border-2 border-mindflayer">
+                            <div className="text-2xl text-mindflayer font-bold mb-4">TASK</div>
+                            <div className="space-y-3 text-lg">
+                                <div>1. Identify the <span className="text-red-500 font-bold">CIRCULAR DEPENDENCY LOOP</span></div>
+                                <div>2. Find which processes are in the deadlock</div>
+                                <div>3. Calculate the "kill cost" using the formula below</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-black/40 p-6 rounded-lg border-2 border-gate">
+                            <div className="text-xl text-gate font-bold mb-4">WHAT IS A CIRCULAR DEPENDENCY?</div>
+                            <div className="space-y-2 text-lg">
+                                <div>• Process A waits for Resource X</div>
+                                <div>• Resource X is held by Process B</div>
+                                <div>• Process B waits for Resource Y</div>
+                                <div>• Resource Y is held by Process A</div>
+                                <div className="text-red-500 mt-2">→ Deadlock! Neither can proceed.</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-black/40 p-6 rounded-lg border-2 border-yellow-500">
+                            <div className="text-xl text-yellow-500 font-bold mb-4">⚠️ DISTRACTOR WARNING</div>
+                            <div className="text-lg">
+                                Not all processes may be in the loop!
+                            </div>
+                            <div className="text-sm text-gray-400 mt-2">
+                                A process that waits for a resource in the loop but isn't waited on by the loop is <span className="text-red-500">NOT part of the cycle</span>
+                            </div>
+                        </div>
+
+                        <div className="bg-black/40 p-8 rounded-lg border-4 border-green-500">
+                            <div className="text-2xl text-green-500 font-bold mb-4 text-center">KILL COST FORMULA</div>
+                            <div className="bg-black p-6 rounded text-3xl text-center text-yellow-500 font-bold mb-4">
+                                (Sum of Process IDs in Cycle) × (Number of Nodes)
+                            </div>
+                            <div className="text-lg text-gray-400 text-center">
+                                Example: If P1, P2, P3 are in the cycle:<br />
+                                (1 + 2 + 3) × 3 = <span className="text-green-500 font-bold">18</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="text-center text-gray-400 font-mono text-lg mt-6">
+                        📝 SUBMIT FORMAT: Integer (e.g., "18")
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default Phase3;

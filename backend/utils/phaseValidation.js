@@ -1,69 +1,60 @@
 /**
- * Phase Validation Logic for The Upside Down Protocol
- * Each function validates the user's answer for a specific phase
+ * Phase Validation Logic for The Upside Down Protocol - HARD MODE
+ * Requires advanced CS algorithms: bit manipulation, rotated arrays, graph cycles, max flow
  */
 
 /**
- * Phase 1: The Demodog Formation (Sorting)
- * Expected answer: "Vecna, Dart, Demogorgon, Mind Flayer"
- * Sorting logic:
- * 1. Sort by Power (High to Low)
- * 2. If tied, sort by Speed (Low to High)
- * 3. Swap Index 1 and Index 3
+ * Phase 1: The Russian Code (Hamming Weight Sorting)
+ * Hex values must be sorted by number of 1-bits (Hamming weight)
+ * Expected answers vary based on which rule is active:
+ * - Rule 1 (Hamming desc): "0xFF, 0x7E, 0xB2, 0x33, 0x1A, 0x0C"
+ * - Rule 2 (Hex value asc): "0x0C, 0x1A, 0x33, 0x7E, 0xB2, 0xFF"
  */
 export function validatePhase1(answer) {
-    const normalized = answer.toLowerCase().trim();
-    const validAnswers = [
-        'vecna, dart, demogorgon, mind flayer',
-        'vecna,dart,demogorgon,mind flayer'
-    ];
+    // Normalize: remove spaces, convert to uppercase
+    const normalized = answer.toUpperCase().replace(/\s+/g, '');
 
-    return validAnswers.includes(normalized);
+    // Accept both possible rule answers
+    const rule1Answer = '0xFF,0x7E,0xB2,0x33,0x1A,0x0C'; // Hamming weight desc
+    const rule2Answer = '0x0C,0x1A,0x33,0x7E,0xB2,0xFF'; // Hex value asc
+
+    return normalized === rule1Answer || normalized === rule2Answer;
 }
 
 /**
- * Phase 2: The Radio Signal (Binary Search)
- * Array: [10, 25, 32, 45, 59, 63, 78, 81, 99]
- * Target: 78
- * Expected answer: "59, 78" (MID values at each step)
+ * Phase 2: The Rotated Vault (Binary Search in Rotated Array)
+ * Array: [55, 61, 70, 85, 12, 19, 23, 40]
+ * Target: 19
+ * Expected answer: "5" (the index of 19)
  */
 export function validatePhase2(answer) {
-    const normalized = answer.replace(/\s+/g, '').toLowerCase();
-    const validAnswers = [
-        '59,78',
-        '59, 78'
-    ];
-
-    return validAnswers.includes(answer.trim());
+    const normalized = answer.trim();
+    return normalized === '5';
 }
 
 /**
- * Phase 3: The Hive Mind (Linked List)
- * Memory addresses:
- * 101 -> 'H' -> 505
- * 505 -> 'E' -> 202
- * 202 -> 'L' -> 909
- * 909 -> 'P' -> NULL
- * Instruction: Skip node at 505
- * Expected answer: "HLP"
+ * Phase 3: The Memory Leak (Graph Cycle Detection)
+ * Process-Resource Graph:
+ * P1 holds R1, waits R2 → P2 holds R2, waits R3 → P3 holds R3, waits R1
+ * Cycle: P1 → P2 → P3 (IDs: 1, 2, 3)
+ * Formula: Sum of IDs × Node count = (1+2+3) × 3 = 18
+ * Expected answer: "18"
  */
 export function validatePhase3(answer) {
-    const normalized = answer.toUpperCase().trim();
-    return normalized === 'HLP';
+    const normalized = answer.trim();
+    return normalized === '18';
 }
 
 /**
- * Phase 4: The Map (Graph Shortest Path)
- * Graph with nodes A, B, C, D, E, F
- * Modifications:
- * - A-B is destroyed
- * - F-E is open (weight 0)
- * Shortest path A → E: A → C (3) → F (4) → E (0) = 7
- * Expected answer: "7"
+ * Phase 4: The Power Grid (Max Flow Calculation)
+ * Network: S→A(10), S→B(5), A→B(2), A→T(4), B→T(9)
+ * Max Flow from S to T = 11
+ * Paths: S→A→T(4) + S→A→B→T(2) + S→B→T(5) = 11
+ * Expected answer: "11"
  */
 export function validatePhase4(answer) {
     const normalized = answer.trim();
-    return normalized === '7';
+    return normalized === '11';
 }
 
 /**
@@ -84,3 +75,4 @@ export function validateAnswer(phase, answer) {
             return false;
     }
 }
+

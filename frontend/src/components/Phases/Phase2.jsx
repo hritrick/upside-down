@@ -1,142 +1,120 @@
 import { motion } from 'framer-motion';
 
-const frequencyArray = [10, 25, 32, 45, 59, 63, 78, 81, 99];
-
 function Phase2({ playerRole }) {
-    if (playerRole === 'A') {
-        // THE EYES - Display Array as Frequency Bars
-        return (
-            <div className="max-w-5xl mx-auto">
-                <motion.h2
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-gate mb-8 text-center tracking-wider"
-                    style={{ fontFamily: 'serif' }}
-                >
-                    THE RADIO SIGNAL
-                </motion.h2>
+    // Rotated sorted array - originally [12, 19, 23, 40, 55, 61, 70, 85], rotated at index 4
+    const rotatedArray = [55, 61, 70, 85, 12, 19, 23, 40];
+    const target = 19;
 
-                <div className="bg-black border-4 border-gate p-8 rounded-lg">
-                    <div className="text-gate text-xl font-mono mb-6 text-center">
-                        📻 FREQUENCY ARRAY
+    return (
+        <div className="min-h-full">
+            <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-5xl font-bold text-gate mb-8 text-center tracking-wider"
+                style={{ fontFamily: 'serif' }}
+            >
+                THE ROTATED VAULT
+            </motion.h2>
+
+            {playerRole === 'A' ? (
+                // Player A: The Eyes - Sees the Array Without Indices
+                <div className="space-y-8">
+                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
+                        🔐 VAULT SEQUENCE (NO INDEX LABELS)
                     </div>
 
-                    <div className="flex justify-center items-end gap-4 h-64 mb-8">
-                        {frequencyArray.map((value, index) => (
+                    <div className="flex gap-4 justify-center items-end max-w-5xl mx-auto">
+                        {rotatedArray.map((value, index) => (
                             <motion.div
                                 key={index}
-                                initial={{ height: 0 }}
-                                animate={{ height: `${(value / 100) * 100}%` }}
-                                transition={{ delay: index * 0.1, duration: 0.5 }}
-                                className="relative flex-1 bg-gradient-to-t from-gate to-mindflayer rounded-t-lg border-2 border-gate/50 group"
-                                style={{
-                                    minHeight: '40px',
-                                    boxShadow: '0 0 15px rgba(139, 0, 0, 0.5)'
-                                }}
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="relative"
                             >
+                                {/* Value Display */}
                                 <motion.div
-                                    whileHover={{ scale: 1.1 }}
-                                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-white font-mono font-bold text-xl"
+                                    whileHover={{ scale: 1.1, boxShadow: '0 0 30px #8B0000' }}
+                                    className="bg-black/60 border-4 border-gate p-6 rounded-lg"
+                                    style={{
+                                        height: `${(value / 85) * 200 + 100}px`,
+                                        minWidth: '80px'
+                                    }}
                                 >
-                                    {value}
+                                    <div className="text-4xl text-green-500 font-mono text-center"
+                                        style={{ fontFamily: 'Source Code Pro, Consolas, monospace' }}>
+                                        {value}
+                                    </div>
                                 </motion.div>
+
+                                {/* Position Marker (NOT index) */}
+                                <div className="text-center mt-2 text-gray-400 font-mono text-lg">
+                                    POS {index + 1}
+                                </div>
                             </motion.div>
                         ))}
                     </div>
 
-                    <div className="flex justify-center gap-6 font-mono text-white">
-                        {frequencyArray.map((value, index) => (
-                            <span key={index} className="text-sm">
-                                [{value}]
-                            </span>
-                        ))}
+                    <div className="text-center mt-8">
+                        <div className="text-gate text-3xl font-bold font-mono mb-2">
+                            TARGET VALUE: {target}
+                        </div>
+                        <div className="text-gray-400 font-mono">
+                            ⚠️ INDICES ARE HIDDEN - YOU MUST MENTALLY MAP POSITIONS
+                        </div>
                     </div>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.2 }}
-                    className="mt-8 text-center text-mindflayer font-mono text-lg"
-                >
-                    📡 Relay these frequency values to your partner
-                </motion.div>
-            </div>
-        );
-    } else {
-        // THE BRAIN - Display Binary Search Instructions
-        return (
-            <div className="max-w-4xl mx-auto">
-                <motion.h2
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-mindflayer mb-8 text-center tracking-wider"
-                    style={{ fontFamily: 'serif' }}
-                >
-                    THE RADIO SIGNAL
-                </motion.h2>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-black border-4 border-mindflayer p-8 rounded-lg font-mono shadow-[0_0_30px_#6A0DAD]"
-                >
-                    <div className="text-mindflayer text-2xl mb-6 text-center">
-                        🎯 <span className="text-gate font-bold">TARGET FREQUENCY: 78</span>
+            ) : (
+                // Player B: The Brain - Gets the Search Algorithm
+                <div className="space-y-8 max-w-3xl mx-auto">
+                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
+                        🧠 SEARCH PROTOCOL
                     </div>
 
-                    <div className="space-y-6 text-white text-lg">
-                        <motion.div
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                            className="border-2 border-gate p-4 rounded"
-                        >
-                            <div className="text-gate font-bold mb-2">📋 ALGORITHM:</div>
-                            <div className="pl-4">Binary Search</div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.7 }}
-                            className="border-2 border-mindflayer p-4 rounded"
-                        >
-                            <div className="text-mindflayer font-bold mb-2">📝 TASK:</div>
-                            <div className="pl-4">
-                                Find the <span className="text-gate">MID</span> value at each step of the binary search
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.9 }}
-                            className="border-2 border-eleven p-4 rounded"
-                        >
-                            <div className="text-eleven font-bold mb-2">💡 EXAMPLE:</div>
-                            <div className="pl-4 text-sm space-y-1">
-                                <div>Step 1: MID = 59</div>
-                                <div>Step 2: MID = ...</div>
-                            </div>
-                        </motion.div>
+                    <div className="bg-black/60 border-4 border-green-500 p-6 rounded-lg text-center mb-6">
+                        <div className="text-lg text-gray-400 font-mono mb-2">TARGET TO FIND:</div>
+                        <div className="text-7xl font-bold text-green-500 font-mono">{target}</div>
                     </div>
 
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1.2 }}
-                        className="mt-8 pt-6 border-t border-mindflayer/50"
-                    >
-                        <div className="text-green-500 text-sm">
-                            &gt; Submit answer format: <span className="text-white">value1, value2</span>
+                    <div className="space-y-4 text-white font-mono">
+                        <div className="bg-mindflayer/20 p-6 rounded-lg border-2 border-mindflayer">
+                            <div className="text-2xl text-mindflayer font-bold mb-4">⚠️ ALGORITHM</div>
+                            <div className="space-y-3 text-lg">
+                                <div>This is a <span className="text-red-500 font-bold">ROTATED SORTED ARRAY</span></div>
+                                <div>It was originally sorted, then rotated at some pivot point</div>
+                                <div className="text-gray-400 text-sm">Example: [12,19,23,40,55,61,70,85] → [55,61,70,85,12,19,23,40]</div>
+                            </div>
                         </div>
-                    </motion.div>
-                </motion.div>
-            </div>
-        );
-    }
+
+                        <div className="bg-black/40 p-6 rounded-lg border-2 border-gate space-y-3">
+                            <div className="text-xl text-gate font-bold">STEP 1: Find the Pivot</div>
+                            <div>• Compare LEFT value with RIGHT value</div>
+                            <div>• If LEFT &gt; RIGHT, the pivot is somewhere in middle</div>
+                        </div>
+
+                        <div className="bg-black/40 p-6 rounded-lg border-2 border-gate space-y-3">
+                            <div className="text-xl text-gate font-bold">STEP 2: Determine Which Half to Search</div>
+                            <div>• Compare MID value with target</div>
+                            <div>• Check if MID to RIGHT is sorted (MID &lt; RIGHT)</div>
+                            <div>• If target is in the sorted half, search there</div>
+                            <div>• Else search the rotated half</div>
+                        </div>
+
+                        <div className="bg-black/40 p-6 rounded-lg border-2 border-green-500">
+                            <div className="text-xl text-green-500 font-bold">STEP 3: Submit the INDEX</div>
+                            <div>• Your partner can only see POSITIONS (1, 2, 3...)</div>
+                            <div>• You need to convert: <span className="text-yellow-500">Position N = Index (N-1)</span></div>
+                            <div>• <span className="text-red-500">Submit the INDEX (0-7)</span>, not the position!</div>
+                        </div>
+                    </div>
+
+                    <div className="text-center text-gray-400 font-mono text-lg mt-6">
+                        📝 SUBMIT FORMAT: Single digit (0-7)
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default Phase2;

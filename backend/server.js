@@ -104,6 +104,7 @@ app.use((err, req, res, next) => {
 
 // Store active timers for each team
 const teamTimers = new Map();
+const glitchTimers = new Map();
 
 io.on('connection', (socket) => {
     console.log(`🔌 Player connected: ${socket.id}`);
@@ -166,6 +167,9 @@ io.on('connection', (socket) => {
 
             // Start the timer
             startTeamTimer(teamCode);
+
+            // Start the glitch interference timer  
+            startGlitchTimer(teamCode);
 
             callback({
                 success: true,
@@ -257,42 +261,59 @@ io.on('connection', (socket) => {
 
 // ========== TIMER MANAGEMENT ==========
 function startTeamTimer(teamCode) {
+    if (teamTimers.has(teamCode)) {
+        clearInterval(teamTimers.get(teamCode));
+    }
+
     const interval = setInterval(async () => {
-        try {
-            const team = await Team.findOne({ teamName: teamCode });
-
-            if (!team || team.status !== 'playing') {
-                clearInterval(interval);
-                teamTimers.delete(teamCode);
-                return;
-            }
-
-            team.timerSeconds -= 1;
-            await team.save();
-
-            // Emit timer update
-            io.to(teamCode).emit('timer_update', {
-                timerSeconds: team.timerSeconds
-            });
-
-            // Check if time's up
-            if (team.timerSeconds <= 0) {
-                team.status = 'failed';
-                team.endTime = new Date();
-                await team.save();
-
-                io.to(teamCode).emit('time_up');
-                clearInterval(interval);
-                teamTimers.delete(teamCode);
-            }
-        } catch (error) {
-            console.error('Timer error:', error);
+        const team = await Team.findOne({ teamName: teamCode });
+        if (!team) {
             clearInterval(interval);
             teamTimers.delete(teamCode);
+            return;
+        }
+
+        team.timerSeconds -= 1;
+
+        if (team.timerSeconds <= 0) {
+            team.status = 'failed';
+            team.endTime = new Date();
+            await team.save();
+
+            io.to(teamCode).emit('time_up');
+            clearInterval(interval);
+            teamTimers.delete(teamCode);
+            stopGlitchTimer(teamCode);
+        } else {
+            await team.save();
+            io.to(teamCode).emit('timer_update', { timerSeconds: team.timerSeconds });
         }
     }, 1000);
 
     teamTimers.set(teamCode, interval);
+}
+
+// ========== HELPER: START GLITCH TIMER (Mind Flayer's Interference) ==========
+function startGlitchTimer(teamCode) {
+    if (glitchTimers.has(teamCode)) {
+        clearInterval(glitchTimers.get(teamCode));
+    }
+
+    const glitchInterval = setInterval(() => {
+        console.log(`⚡ Glitch event triggered for team: ${teamCode}`);
+        io.to(teamCode).emit('glitch_event', { duration: 5000 });
+    }, 45000); // Every 45 seconds
+
+    glitchTimers.set(teamCode, glitchInterval);
+}
+
+// ========== HELPER: STOP GLITCH TIMER ==========
+function stopGlitchTimer(teamCode) {
+    if (glitchTimers.has(teamCode)) {
+        clearInterval(glitchTimers.get(teamCode));
+        glitchTimers.delete(teamCode);
+        console.log(`⚡ Glitch timer stopped for team: ${teamCode}`);
+    }
 }
 
 function stopTeamTimer(teamCode) {
