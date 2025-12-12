@@ -45,7 +45,7 @@ const teamSchema = new mongoose.Schema({
     },
     timerSeconds: {
         type: Number,
-        default: 1200 // 20 minutes
+        default: 720 // 12 minutes
     }
 }, {
     timestamps: true

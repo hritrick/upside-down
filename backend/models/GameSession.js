@@ -33,7 +33,7 @@ const gameSessionSchema = new mongoose.Schema({
     timerSeconds: {
         type: Number,
         required: true,
-        default: 1200 // 20 minutes
+        default: 720 // 12 minutes
     },
     priceKeyAttempts: {
         type: Number,

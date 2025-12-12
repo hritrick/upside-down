@@ -14,7 +14,7 @@ export const useGame = () => {
 export const GameProvider = ({ children }) => {
     const [sessionId, setSessionId] = useState(null);
     const [currentPhase, setCurrentPhase] = useState(1);
-    const [timerSeconds, setTimerSeconds] = useState(1200); // 20 minutes
+    const [timerSeconds, setTimerSeconds] = useState(720); // 12 minutes
     const [phasesCompleted, setPhasesCompleted] = useState([false, false, false, false]);
     const [gameStarted, setGameStarted] = useState(false);
     const [gameCompleted, setGameCompleted] = useState(false);

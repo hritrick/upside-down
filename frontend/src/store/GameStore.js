@@ -7,7 +7,7 @@ const useGameStore = create((set) => ({
 
     // Game State
     currentPhase: 1,
-    timerSeconds: 1200, // 20 minutes
+    timerSeconds: 720, // 12 minutes
     status: 'idle', // idle, waiting, playing, completed, failed
 
     // Connection State
