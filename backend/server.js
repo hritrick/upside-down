@@ -24,6 +24,7 @@ const io = new Server(httpServer, {
             'http://localhost:3000',
             'http://localhost:3001',
             'https://panic-grocery-run.vercel.app',
+            'https://the-algorithm-hunt.netlify.app',
             process.env.FRONTEND_URL
         ].filter(Boolean),
         methods: ['GET', 'POST'],
@@ -43,6 +44,7 @@ app.use(cors({
         'http://localhost:3000',
         'http://localhost:3001',
         'https://panic-grocery-run.vercel.app',
+        'https://the-algorithm-hunt.netlify.app',
         process.env.FRONTEND_URL
     ].filter(Boolean),
     credentials: true
@@ -109,13 +111,17 @@ io.on('connection', (socket) => {
     // ========== CREATE TEAM ==========
     socket.on('create_team', async (callback) => {
         try {
+            console.log('📝 CREATE TEAM request from:', socket.id);
             const teamCode = await Team.generateTeamCode();
+            console.log('🎲 Generated team code:', teamCode);
+
             const team = new Team({
                 teamName: teamCode,
                 playerA_socketId: socket.id,
                 status: 'waiting'
             });
             await team.save();
+            console.log('✅ Team saved:', teamCode);
 
             socket.join(teamCode);
             console.log(`🎮 Team created: ${teamCode} by ${socket.id}`);
@@ -126,8 +132,8 @@ io.on('connection', (socket) => {
                 playerRole: 'A'
             });
         } catch (error) {
-            console.error('Error creating team:', error);
-            callback({ success: false, error: 'Failed to create team' });
+            console.error('❌ Error creating team:', error);
+            callback({ success: false, error: error.message || 'Failed to create team' });
         }
     });
 
