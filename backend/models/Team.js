@@ -30,6 +30,10 @@ const teamSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    lockdownUntil: {
+        type: Number,
+        default: 0 // Timestamp when lockdown expires
+    },
     status: {
         type: String,
         enum: ['waiting', 'playing', 'completed', 'failed'],

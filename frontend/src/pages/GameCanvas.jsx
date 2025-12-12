@@ -26,6 +26,8 @@ function GameCanvas() {
     const [answer, setAnswer] = useState('');
     const [showFeedback, setShowFeedback] = useState(null); // 'correct' or 'wrong'
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLocked, setIsLocked] = useState(false);
+    const [lockdownTimer, setLockdownTimer] = useState(0);
 
     useEffect(() => {
         // Redirect if no team code
@@ -39,29 +41,52 @@ function GameCanvas() {
             updateTimer(timerSeconds);
         });
 
-        // Listen for answer results
-        socket.on('answer_result', ({ success, currentPhase: newPhase, status }) => {
-            setIsSubmitting(false);
-            if (success) {
-                // Correct answer
-                setShowFeedback('correct');
-                setAnswer('');
-
-                setTimeout(() => {
-                    setShowFeedback(null);
-                    setPhase(newPhase);
-
-                    // Navigate to victory if game completed
-                    if (status === 'completed') {
-                        useGameStore.getState().setGameStatus('completed');
-                        setTimeout(() => navigate('/victory'), 500);
-                    }
-                }, 2000);
-            } else {
-                // Wrong answer
-                setShowFeedback('wrong');
-                setTimeout(() => setShowFeedback(null), 1500);
+        // Audio feedback helper
+        const playSound = (soundName) => {
+            try {
+                const audio = new Audio(`/sounds/${soundName}.mp3`);
+                audio.volume = 0.5;
+                audio.play().catch(err => console.log('Audio play failed:', err));
+            } catch (error) {
+                console.log('Audio error:', error);
             }
+        };
+
+        // Listen for CORRECT answers
+        socket.on('answer_correct', ({ success, currentPhase: newPhase, status }) => {
+            setIsSubmitting(false);
+            setShowFeedback('correct');
+            setAnswer('');
+            setIsLocked(false);
+            playSound('success');
+
+            setTimeout(() => {
+                setShowFeedback(null);
+                setPhase(newPhase);
+
+                // Navigate to victory if game completed
+                if (status === 'completed') {
+                    useGameStore.getState().setGameStatus('completed');
+                    setTimeout(() => navigate('/victory'), 500);
+                }
+            }, 2000);
+        });
+
+        // Listen for INCORRECT answers (30s lockdown)
+        socket.on('answer_incorrect', ({ lockdownSeconds }) => {
+            setIsSubmitting(false);
+            setShowFeedback('wrong');
+            setIsLocked(true);
+            setLockdownTimer(lockdownSeconds);
+            playSound('error');
+
+            setTimeout(() => setShowFeedback(null), 1500);
+        });
+
+        // Listen for attempts during lockdown
+        socket.on('error_locked', ({ remainingSeconds }) => {
+            playSound('lockdown');
+            setLockdownTimer(remainingSeconds);
         });
 
         // Listen for time up
@@ -92,12 +117,31 @@ function GameCanvas() {
 
         return () => {
             socket.off('timer_update');
-            socket.off('answer_result');
+            socket.off('answer_correct');
+            socket.off('answer_incorrect');
+            socket.off('error_locked');
             socket.off('time_up');
             socket.off('partner_disconnected');
             socket.off('glitch_event');
         };
     }, [socket, teamCode, playerRole, navigate, updateTimer, setPhase, setPartnerDisconnected]);
+
+    // Lockdown countdown timer
+    useEffect(() => {
+        if (lockdownTimer > 0) {
+            const interval = setInterval(() => {
+                setLockdownTimer((prev) => {
+                    if (prev <= 1) {
+                        setIsLocked(false);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [lockdownTimer]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -243,8 +287,8 @@ function GameCanvas() {
             {/* Main Content Area - Apply glitch effect to Player A */}
             <div
                 className={`flex-1 overflow-y-auto p-8 transition-all duration-300 ${glitchActive && playerRole === 'A'
-                        ? 'blur-sm grayscale hue-rotate-90'
-                        : ''
+                    ? 'blur-sm grayscale hue-rotate-90'
+                    : ''
                     }`}
             >
                 <AnimatePresence mode="wait">
@@ -260,28 +304,43 @@ function GameCanvas() {
                 </AnimatePresence>
             </div>
 
-            {/* Bottom Input Bar */}
+            {/* Bottom Input Bar - with Lockdown State */}
             <form
                 onSubmit={handleSubmit}
-                className="bg-black/80 border-t-2 border-gate p-6 sticky bottom-0 z-40"
+                className={`bg-black/80 border-t-2 ${isLocked ? 'border-red-600' : 'border-gate'} p-6 sticky bottom-0 z-40`}
             >
+                {isLocked && (
+                    <div className="max-w-4xl mx-auto mb-4 bg-red-600/20 border-2 border-red-600 p-4 rounded-lg">
+                        <motion.div
+                            animate={{ opacity: [1, 0.5, 1] }}
+                            transition={{ duration: 0.8, repeat: Infinity }}
+                            className="text-red-500 text-2xl font-bold font-mono text-center"
+                        >
+                            🔒 SYSTEM LOCKDOWN: {lockdownTimer}s
+                        </motion.div>
+                        <div className="text-gray-400 text-sm font-mono text-center mt-2">
+                            Input disabled due to incorrect answer
+                        </div>
+                    </div>
+                )}
+
                 <div className="max-w-4xl mx-auto flex gap-4 items-center">
-                    <div className="text-gate text-2xl font-mono">&gt;</div>
+                    <div className={`text-2xl font-mono ${isLocked ? 'text-red-600' : 'text-gate'}`}>&gt;</div>
                     <input
                         type="text"
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
-                        placeholder="Enter your answer..."
-                        disabled={isSubmitting}
-                        className="flex-1 bg-black border-2 border-gate text-green-500 px-4 py-3 text-xl font-mono focus:outline-none focus:border-gate-light focus:shadow-[0_0_20px_#8B0000] disabled:opacity-50"
-                        style={{ caretColor: '#00ff00' }}
+                        placeholder={isLocked ? "System locked..." : "Enter your answer..."}
+                        disabled={isSubmitting || isLocked}
+                        className={`flex-1 bg-black border-2 ${isLocked ? 'border-red-600 text-red-500' : 'border-gate text-green-500'} px-4 py-3 text-xl font-mono focus:outline-none focus:border-gate-light focus:shadow-[0_0_20px_#8B0000] disabled:opacity-50`}
+                        style={{ caretColor: isLocked ? '#ff0000' : '#00ff00' }}
                     />
                     <button
                         type="submit"
-                        disabled={!answer.trim() || isSubmitting}
-                        className="px-8 py-3 bg-gate border-2 border-gate text-white font-mono text-xl tracking-wider hover:bg-gate-light disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        disabled={!answer.trim() || isSubmitting || isLocked}
+                        className={`px-8 py-3 border-2 ${isLocked ? 'bg-red-600/20 border-red-600 text-red-500' : 'bg-gate border-gate text-white'} font-mono text-xl tracking-wider hover:bg-gate-light disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
                     >
-                        {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+                        {isLocked ? `LOCKED (${lockdownTimer}s)` : isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
                     </button>
                 </div>
             </form>

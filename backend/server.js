@@ -182,7 +182,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // ========== SUBMIT ANSWER ==========
+    // ========== SUBMIT ANSWER (WITH LOCKDOWN PENALTY) ==========
     socket.on('submit_answer', async ({ teamCode, answer }, callback) => {
         try {
             const team = await Team.findOne({ teamName: teamCode });
@@ -191,37 +191,61 @@ io.on('connection', (socket) => {
                 return callback({ success: false, error: 'Team not found' });
             }
 
+            // Check if team is in lockdown
+            const now = Date.now();
+            if (now < team.lockdownUntil) {
+                const remainingSeconds = Math.ceil((team.lockdownUntil - now) / 1000);
+                console.log(`🔒 Team ${teamCode} is locked for ${remainingSeconds}s`);
+
+                io.to(teamCode).emit('error_locked', {
+                    remainingSeconds,
+                    message: 'System is locked due to incorrect answer'
+                });
+
+                return callback({ success: false, error: 'System locked', locked: true, remainingSeconds });
+            }
+
             const isCorrect = validateAnswer(team.currentPhase, answer);
 
             if (isCorrect) {
-                // Store the answer
+                // Correct answer - clear any lockdown
+                team.lockdownUntil = 0;
                 team.phaseAnswers.push(answer);
-
-                // Advance phase
                 team.advancePhase();
                 await team.save();
 
+                console.log(`✅ Team ${teamCode} advanced to phase ${team.currentPhase}`);
+
                 // Notify both players of success
-                io.to(teamCode).emit('answer_result', {
+                io.to(teamCode).emit('answer_correct', {
                     success: true,
                     currentPhase: team.currentPhase,
                     status: team.status
                 });
 
-                // If game completed, stop timer
+                // If game completed, stop timers
                 if (team.status === 'completed') {
                     stopTeamTimer(teamCode);
+                    stopGlitchTimer(teamCode);
                 }
 
                 callback({ success: true, correct: true });
             } else {
-                // Wrong answer
-                io.to(teamCode).emit('answer_result', {
+                // Wrong answer - activate 30s lockdown
+                team.lockdownUntil = Date.now() + 30000; // 30 seconds
+                await team.save();
+
+                console.log(`❌ Team ${teamCode} wrong answer - locked for 30s`);
+
+                // Notify both players of failure and lockdown
+                io.to(teamCode).emit('answer_incorrect', {
                     success: false,
-                    currentPhase: team.currentPhase
+                    currentPhase: team.currentPhase,
+                    locked: true,
+                    lockdownSeconds: 30
                 });
 
-                callback({ success: true, correct: false });
+                callback({ success: true, correct: false, locked: true });
             }
         } catch (error) {
             console.error('Error submitting answer:', error);
