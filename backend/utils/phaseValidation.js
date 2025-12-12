@@ -28,14 +28,36 @@ export function validatePhase1(answer) {
 }
 
 /**
- * Phase 2: The Rotated Vault (Binary Search in Rotated Array)
- * Array: [55, 61, 70, 85, 12, 19, 23, 40]
- * Target: 19
- * Expected answer: "5" (the index of 19)
+ * Phase 2: The Glitched Matrix (Staircase Search in 2D Sorted Matrix)
+ * Matrix (5x5):
+ * [10, 20, 30, 40, 50]
+ * [15, 25, 35, 45, 55]
+ * [27, 37, 47, 57, 67]
+ * [32, 42, 52, 62, 72]
+ * [38, 48, 58, 68, 78]
+ * 
+ * Target: 47
+ * Start: Top-Right (0,4) = 50
+ * Path: (0,4) → (0,3) → (0,2) → (1,2) → (2,2) ✓
+ * Expected answer: "04-03-02-12-22" or "04,03,02,12,22"
  */
 export function validatePhase2(answer) {
-    const normalized = answer.trim();
-    return normalized === '5';
+    const normalized = answer.replace(/[\s,-]/g, ''); // Remove spaces, commas, dashes
+
+    // Correct path coordinates (row,col format without separators)
+    const correctPaths = [
+        '0403021222',  // 04-03-02-12-22
+        '04030212',    // If they stop at 12 before final
+    ];
+
+    // Also accept with common separators
+    const answerVariants = [
+        answer.replace(/\s/g, ''), // Remove spaces
+        answer.replace(/\s/g, '').replace(/-/g, '').replace(/,/g, ''), // Remove all separators
+    ];
+
+    return correctPaths.includes(normalized) ||
+        answerVariants.some(variant => variant === '04-03-02-12-22' || variant === '0403021222');
 }
 
 /**

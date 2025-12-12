@@ -131,15 +131,15 @@ function Phase3({ playerRole }) {
                             <div className="bg-black p-6 rounded text-3xl text-center text-yellow-500 font-bold mb-4">
                                 (Sum of Process IDs in Cycle) × (Number of Nodes)
                             </div>
-                            <div className="text-lg text-gray-400 text-center">
+                            {/* <div className="text-lg text-gray-400 text-center">
                                 Example: If P1, P2, P3 are in the cycle:<br />
                                 (1 + 2 + 3) × 3 = <span className="text-green-500 font-bold">18</span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
                     <div className="text-center text-gray-400 font-mono text-lg mt-6">
-                        📝 SUBMIT FORMAT: Integer (e.g., "18")
+                        📝 SUBMIT FORMAT: Integer (e.g., "73")
                     </div>
                 </div>
             )}
