@@ -58,11 +58,12 @@ export function validatePhase3(answer) {
  * Modifications:
  * - A-B is destroyed
  * - F-E is open (weight 0)
- * Expected answer: "14" (shortest path cost from A to E)
+ * Shortest path A → E: A → C (3) → F (4) → E (0) = 7
+ * Expected answer: "7"
  */
 export function validatePhase4(answer) {
     const normalized = answer.trim();
-    return normalized === '14';
+    return normalized === '7';
 }
 
 /**
