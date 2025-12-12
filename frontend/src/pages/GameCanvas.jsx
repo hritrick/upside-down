@@ -51,6 +51,7 @@ function GameCanvas() {
 
                     // Navigate to victory if game completed
                     if (status === 'completed') {
+                        useGameStore.getState().setGameStatus('completed');
                         setTimeout(() => navigate('/victory'), 500);
                     }
                 }, 2000);
