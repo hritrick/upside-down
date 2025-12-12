@@ -12,11 +12,10 @@ export const validateDijkstra = (code, language) => {
         visited: /visited|seen|processed/i,
         relaxation: /(distance|dist|cost)\s*\[\s*\w+\s*\]\s*[+]\s*\w+/,
 
-        // Language-specific patterns
+        // Language-specific patterns (Python, C, Java only)
         python: /import\s+heapq|heappush|heappop/i,
-        cpp: /#include\s*<queue>|priority_queue/i,
-        java: /PriorityQueue|Queue/i,
-        javascript: /MinHeap|PriorityQueue/i
+        c: /minDistance|dijkstra/i,
+        java: /PriorityQueue|Queue/i
     };
 
     let score = 0;

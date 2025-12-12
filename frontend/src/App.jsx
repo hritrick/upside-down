@@ -1,28 +1,29 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { GameProvider } from './context/GameContext';
-import Home from './pages/Home';
-import Game from './pages/Game';
+import { SocketProvider } from './context/SocketContext';
+import Lobby from './pages/Lobby';
+import GameCanvas from './pages/GameCanvas';
 import Victory from './pages/Victory';
-import Leaderboard from './pages/Leaderboard';
 import './index.css';
 
 function App() {
     return (
-        <GameProvider>
+        <SocketProvider>
             <Router>
-                <div className="min-h-screen bg-void">
+                <div className="min-h-screen bg-void relative overflow-hidden">
                     {/* Scanline effect */}
                     <div className="scanline"></div>
 
+                    {/* Static grain overlay */}
+                    <div className="fixed inset-0 opacity-5 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuNSIvPjwvc3ZnPg==')]"></div>
+
                     <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/game" element={<Game />} />
+                        <Route path="/" element={<Lobby />} />
+                        <Route path="/game" element={<GameCanvas />} />
                         <Route path="/victory" element={<Victory />} />
-                        <Route path="/leaderboard" element={<Leaderboard />} />
                     </Routes>
                 </div>
             </Router>
-        </GameProvider>
+        </SocketProvider>
     );
 }
 

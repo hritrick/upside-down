@@ -55,7 +55,7 @@ const Leaderboard = () => {
                             {/* Header */}
                             <div className="grid grid-cols-12 gap-4 pb-3 border-b-2 border-terminal text-terminal font-bold">
                                 <div className="col-span-1">RANK</div>
-                                <div className="col-span-6">TEAM</div>
+                                <div className="col-span-6">PLAYER</div>
                                 <div className="col-span-3">TIME</div>
                                 <div className="col-span-2">ATTEMPTS</div>
                             </div>

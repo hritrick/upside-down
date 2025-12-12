@@ -5,17 +5,15 @@ import { useGame } from '../context/GameContext';
 
 const Home = () => {
     const [player1, setPlayer1] = useState('');
-    const [player2, setPlayer2] = useState('');
     const [showRules, setShowRules] = useState(false);
     const { startGame } = useGame();
     const navigate = useNavigate();
 
     const handleStartGame = async () => {
         try {
-            const p1 = player1.trim() || 'Player 1';
-            const p2 = player2.trim() || 'Player 2';
+            const p1 = player1.trim() || 'Solo Player';
 
-            await startGame(p1, p2);
+            await startGame(p1);
             navigate('/game');
         } catch (error) {
             alert('Failed to start game. Please try again.');
@@ -45,7 +43,7 @@ const Home = () => {
                         Close the Gate Before It's Too Late
                     </p>
                     <p className="text-lg text-gray-400 mt-2">
-                        A Cooperative Algorithm Game for 2 Players
+                        A Solo Algorithm Challenge
                     </p>
                 </motion.div>
 
@@ -57,29 +55,16 @@ const Home = () => {
                     className="bg-void border-2 border-gate p-8"
                     style={{ boxShadow: '0 0 30px rgba(139, 0, 0, 0.3)' }}
                 >
-                    {/* Player Inputs */}
-                    <div className="space-y-6 mb-8">
-                        <div>
-                            <label className="block text-gate mb-2 font-bold">PLAYER 1 NAME</label>
-                            <input
-                                type="text"
-                                value={player1}
-                                onChange={(e) => setPlayer1(e.target.value)}
-                                placeholder="Enter name..."
-                                className="w-full bg-void border-2 border-gate text-gate px-4 py-3 focus:outline-none focus:border-gate-light transition-colors"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-mindflayer mb-2 font-bold">PLAYER 2 NAME</label>
-                            <input
-                                type="text"
-                                value={player2}
-                                onChange={(e) => setPlayer2(e.target.value)}
-                                placeholder="Enter name..."
-                                className="w-full bg-void border-2 border-mindflayer text-mindflayer px-4 py-3 focus:outline-none focus:border-mindflayer-light transition-colors"
-                            />
-                        </div>
+                    {/* Player Input */}
+                    <div className="mb-8">
+                        <label className="block text-gate mb-2 font-bold">YOUR NAME</label>
+                        <input
+                            type="text"
+                            value={player1}
+                            onChange={(e) => setPlayer1(e.target.value)}
+                            placeholder="Enter your name..."
+                            className="w-full bg-void border-2 border-gate text-gate px-4 py-3 focus:outline-none focus:border-gate-light transition-colors"
+                        />
                     </div>
 
                     {/* Start Button */}
@@ -112,7 +97,7 @@ const Home = () => {
 
                                 <p><strong className="text-gate">TIME LIMIT:</strong> 20:00 minutes for all 4 phases.</p>
 
-                                <p><strong className="text-gate">GAMEPLAY:</strong> Local multiplayer - players alternate after each phase.</p>
+                                <p><strong className="text-gate">GAMEPLAY:</strong> Solo challenge - complete all four phases to win.</p>
 
                                 <div className="pl-4 space-y-2">
                                     <p><strong className="text-mindflayer">Phase 1:</strong> Escape the Gate - Find shortest route from Mike's House to Starcourt Basement (Dijkstra's Algorithm)</p>
@@ -123,7 +108,7 @@ const Home = () => {
 
                                 <p><strong className="text-eleven">VICTORY:</strong> Submit correct Energy Key (concatenated energy costs from Phase 4)</p>
 
-                                <p><strong className="text-gate">CODE:</strong> Write algorithm code in Python, C, C++, Java, or JavaScript</p>
+                                <p><strong className="text-gate">CODE:</strong> Write algorithm code in Python, C, or Java (60-70% starter code provided)</p>
                             </div>
                         </motion.div>
                     )}

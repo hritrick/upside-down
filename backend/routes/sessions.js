@@ -9,15 +9,15 @@ const router = express.Router();
 // POST /api/sessions/create - Create a new game session
 router.post('/create', async (req, res) => {
     try {
-        const { player1, player2 } = req.body;
+        const { player1 } = req.body;
 
         const sessionId = uuidv4();
 
         const session = new GameSession({
             sessionId,
             players: {
-                player1: player1 || 'Player 1',
-                player2: player2 || 'Player 2'
+                player1: player1 || 'Solo Player',
+                player2: null
             }
         });
 
@@ -215,7 +215,7 @@ router.post('/:id/validate-key', async (req, res) => {
         if (isValid) {
             // Add to leaderboard
             const leaderboardEntry = new Leaderboard({
-                playerNames: `${session.players.player1} & ${session.players.player2}`,
+                playerNames: session.players.player1,
                 completionTime: session.completionTime,
                 attempts: session.priceKeyAttempts,
                 sessionId: session.sessionId

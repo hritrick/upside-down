@@ -12,8 +12,8 @@ const api = axios.create({
 
 // Session endpoints
 export const sessionAPI = {
-    create: (player1, player2) =>
-        api.post('/sessions/create', { player1, player2 }),
+    create: (player1) =>
+        api.post('/sessions/create', { player1 }),
 
     get: (sessionId) =>
         api.get(`/sessions/${sessionId}`),

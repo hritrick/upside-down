@@ -2,7 +2,7 @@ import { useGame } from '../../context/GameContext';
 import { motion } from 'framer-motion';
 
 const StickyHUD = () => {
-    const { currentPhase, activePlayer, timerSeconds, players } = useGame();
+    const { currentPhase, timerSeconds, playerName } = useGame();
 
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
@@ -27,7 +27,7 @@ const StickyHUD = () => {
                 {/* Logo/Title */}
                 <div className="flex items-center gap-4">
                     <h1 className="text-2xl font-bold text-terminal tracking-wider">
-                        PANIC GROCERY RUN
+                        STRANGER THINGS: THE ALGORITHM HUNT
                     </h1>
                 </div>
 
@@ -51,36 +51,15 @@ const StickyHUD = () => {
                     ))}
                 </div>
 
-                {/* Timer */}
+                {/* Timer & Player */}
                 <div className="flex items-center gap-6">
                     <div className={`text-3xl font-bold ${getTimerColor()} transition-colors duration-300`}>
                         {formatTime(timerSeconds)}
                     </div>
 
-                    {/* Player Indicator */}
-                    <div className="flex items-center gap-3">
-                        <div
-                            className={`
-                px-4 py-2 border-2 transition-all duration-300
-                ${activePlayer === 1
-                                    ? 'bg-terminal text-void border-terminal animate-glow'
-                                    : 'bg-transparent text-terminal border-terminal opacity-50'
-                                }
-              `}
-                        >
-                            <span className="font-bold">{players.player1}</span>
-                        </div>
-                        <div
-                            className={`
-                px-4 py-2 border-2 transition-all duration-300
-                ${activePlayer === 2
-                                    ? 'bg-cyber text-void border-cyber animate-glow'
-                                    : 'bg-transparent text-cyber border-cyber opacity-50'
-                                }
-              `}
-                        >
-                            <span className="font-bold">{players.player2}</span>
-                        </div>
+                    {/* Player Name */}
+                    <div className="px-4 py-2 border-2 bg-gate text-void border-gate">
+                        <span className="font-bold">{playerName}</span>
                     </div>
                 </div>
             </div>

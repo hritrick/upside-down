@@ -1,14 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useGame } from '../context/GameContext';
+import useGameStore from '../store/GameStore';
 
 const Victory = () => {
-    const { completionTime, players, resetGame } = useGame();
     const navigate = useNavigate();
+    const { teamCode, timerSeconds, status, resetGame } = useGameStore();
 
     const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
+        const timeSpent = 1200 - seconds; // Calculate time used
+        const mins = Math.floor(timeSpent / 60);
+        const secs = timeSpent % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
@@ -17,36 +18,41 @@ const Victory = () => {
         navigate('/');
     };
 
-    const handleViewLeaderboard = () => {
-        navigate('/leaderboard');
-    };
+    const isSuccess = status === 'completed';
 
     return (
-        <div className="min-h-screen grid-bg flex items-center justify-center p-8">
+        <div className="min-h-screen flex items-center justify-center p-8 relative">
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', damping: 15 }}
-                className="max-w-3xl w-full text-center"
+                className="max-w-3xl w-full text-center z-10"
             >
-                {/* Victory Title */}
+                {/* Title */}
                 <motion.h1
                     initial={{ y: -100 }}
                     animate={{ y: 0 }}
                     transition={{ type: 'spring', damping: 10, delay: 0.2 }}
-                    className="text-8xl font-bold text-terminal mb-8 tracking-wider"
-                    style={{ textShadow: '0 0 40px #00ff41' }}
+                    className={`text-7xl font-bold mb-8 tracking-wider ${isSuccess ? 'text-green-500' : 'text-gate'
+                        }`}
+                    style={{
+                        fontFamily: 'serif',
+                        textShadow: isSuccess
+                            ? '0 0 40px #00ff00, 0 0 60px #00ff00'
+                            : '0 0 40px #ff0000, 0 0 60px #ff0000'
+                    }}
                 >
-                    🎉 VICTORY! 🎉
+                    {isSuccess ? '✓ PROTOCOL COMPLETE' : '✗ PROTOCOL FAILED'}
                 </motion.h1>
 
                 <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="text-3xl text-cyber mb-12"
+                    className={`text-3xl mb-12 ${isSuccess ? 'text-mindflayer' : 'text-gate'}`}
+                    style={{ fontFamily: 'serif' }}
                 >
-                    Mission Accomplished!
+                    {isSuccess ? 'You escaped the Upside Down!' : 'The gate remains open...'}
                 </motion.p>
 
                 {/* Stats Card */}
@@ -54,32 +60,52 @@ const Victory = () => {
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.7 }}
-                    className="bg-void border-2 border-terminal p-12 mb-8"
-                    style={{ boxShadow: '0 0 40px rgba(0, 255, 65, 0.5)' }}
+                    className={`bg-void border-4 p-12 mb-8 ${isSuccess ? 'border-green-500' : 'border-gate'
+                        }`}
+                    style={{
+                        boxShadow: isSuccess
+                            ? '0 0 40px rgba(0, 255, 0, 0.5)'
+                            : '0 0 40px rgba(139, 0, 0, 0.5)'
+                    }}
                 >
-                    <div className="space-y-6">
+                    <div className="space-y-6 font-mono">
                         <div>
-                            <p className="text-gray-400 text-lg mb-2">TEAM</p>
-                            <p className="text-4xl text-terminal font-bold">
-                                {players.player1} & {players.player2}
+                            <p className="text-gray-400 text-lg mb-2">TEAM CODE</p>
+                            <p className="text-4xl text-mindflayer font-bold tracking-widest">
+                                {teamCode || '####'}
                             </p>
                         </div>
 
-                        <div className="border-t-2 border-gray-700 pt-6">
-                            <p className="text-gray-400 text-lg mb-2">COMPLETION TIME</p>
-                            <p className="text-5xl text-cyber font-bold">
-                                {completionTime ? formatTime(completionTime) : '0:00'}
-                            </p>
-                        </div>
+                        {isSuccess && (
+                            <>
+                                <div className="border-t-2 border-gray-700 pt-6">
+                                    <p className="text-gray-400 text-lg mb-2">COMPLETION TIME</p>
+                                    <p className="text-5xl text-green-500 font-bold">
+                                        {formatTime(timerSeconds)}
+                                    </p>
+                                </div>
 
-                        <div className="border-t-2 border-gray-700 pt-6">
-                            <p className="text-terminal text-xl">
-                                You successfully navigated the chaos of March 2020!
-                            </p>
-                            <p className="text-gray-400 mt-2">
-                                All groceries acquired. Price key validated. Lockdown survived.
-                            </p>
-                        </div>
+                                <div className="border-t-2 border-gray-700 pt-6">
+                                    <p className="text-green-500 text-xl">
+                                        All phases completed successfully!
+                                    </p>
+                                    <p className="text-gray-400 mt-2">
+                                        The Demodog Formation → The Radio Signal → The Hive Mind → The Map
+                                    </p>
+                                </div>
+                            </>
+                        )}
+
+                        {!isSuccess && (
+                            <div className="border-t-2 border-gray-700 pt-6">
+                                <p className="text-gate text-xl">
+                                    Time ran out or connection lost.
+                                </p>
+                                <p className="text-gray-400 mt-2">
+                                    Better luck next time, we need you back in Hawkins!
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </motion.div>
 
@@ -92,15 +118,9 @@ const Victory = () => {
                 >
                     <button
                         onClick={handlePlayAgain}
-                        className="btn-terminal flex-1 text-xl py-4"
+                        className="flex-1 px-8 py-4 bg-mindflayer border-2 border-mindflayer text-white text-xl font-mono tracking-wider rounded-lg shadow-[0_0_20px_#6A0DAD] hover:bg-mindflayer-light transition-all"
                     >
                         PLAY AGAIN
-                    </button>
-                    <button
-                        onClick={handleViewLeaderboard}
-                        className="btn-cyber flex-1 text-xl py-4"
-                    >
-                        LEADERBOARD
                     </button>
                 </motion.div>
             </motion.div>
@@ -109,3 +129,4 @@ const Victory = () => {
 };
 
 export default Victory;
+

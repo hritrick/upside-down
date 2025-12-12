@@ -15,8 +15,8 @@ const gameSessionSchema = new mongoose.Schema({
         },
         player2: {
             type: String,
-            required: true,
-            default: 'Player 2'
+            required: false,
+            default: null
         }
     },
     currentPhase: {

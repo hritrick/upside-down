@@ -14,12 +14,11 @@ export const useGame = () => {
 export const GameProvider = ({ children }) => {
     const [sessionId, setSessionId] = useState(null);
     const [currentPhase, setCurrentPhase] = useState(1);
-    const [activePlayer, setActivePlayer] = useState(1); // 1 or 2
     const [timerSeconds, setTimerSeconds] = useState(1200); // 20 minutes
     const [phasesCompleted, setPhasesCompleted] = useState([false, false, false, false]);
     const [gameStarted, setGameStarted] = useState(false);
     const [gameCompleted, setGameCompleted] = useState(false);
-    const [players, setPlayers] = useState({ player1: 'Player 1', player2: 'Player 2' });
+    const [playerName, setPlayerName] = useState('Solo Player');
     const [checkedShelves, setCheckedShelves] = useState([]);
     const [priceKey, setPriceKey] = useState('');
     const [completionTime, setCompletionTime] = useState(null);
@@ -51,15 +50,14 @@ export const GameProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [gameStarted, gameCompleted, timerSeconds, sessionId]);
 
-    const startGame = async (player1Name, player2Name) => {
+    const startGame = async (player1Name) => {
         try {
-            const response = await sessionAPI.create(player1Name, player2Name);
+            const response = await sessionAPI.create(player1Name);
             const { sessionId: newSessionId, session } = response.data;
 
             setSessionId(newSessionId);
-            setPlayers({ player1: player1Name, player2: player2Name });
+            setPlayerName(player1Name);
             setCurrentPhase(1);
-            setActivePlayer(1);
             setTimerSeconds(1200);
             setPhasesCompleted([false, false, false, false]);
             setGameStarted(true);
@@ -81,8 +79,6 @@ export const GameProvider = ({ children }) => {
 
         if (phaseNumber < 4) {
             setCurrentPhase(phaseNumber + 1);
-            // Switch player after each phase
-            setActivePlayer(prev => prev === 1 ? 2 : 1);
         }
     };
 
@@ -143,7 +139,6 @@ export const GameProvider = ({ children }) => {
     const resetGame = () => {
         setSessionId(null);
         setCurrentPhase(1);
-        setActivePlayer(1);
         setTimerSeconds(1200);
         setPhasesCompleted([false, false, false, false]);
         setGameStarted(false);
@@ -156,12 +151,11 @@ export const GameProvider = ({ children }) => {
     const value = {
         sessionId,
         currentPhase,
-        activePlayer,
         timerSeconds,
         phasesCompleted,
         gameStarted,
         gameCompleted,
-        players,
+        playerName,
         checkedShelves,
         priceKey,
         completionTime,
