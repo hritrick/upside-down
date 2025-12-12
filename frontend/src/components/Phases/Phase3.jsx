@@ -163,7 +163,7 @@ function Phase3({ playerRole }) {
                     </div>
 
                     <div className="text-center text-gray-400 font-mono text-lg mt-6">
-                        📝 SUBMIT FORMAT: Single number (e.g., "9")
+                        📝 SUBMIT FORMAT: Integer
                     </div>
                 </div>
             )}
