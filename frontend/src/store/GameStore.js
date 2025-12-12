@@ -31,6 +31,8 @@ const useGameStore = create((set) => ({
 
     setPhase: (currentPhase) => set({ currentPhase }),
 
+    setGameStatus: (status) => set({ status }),
+
     setConnectionStatus: (isConnected, partnerConnected) => set({
         isConnected,
         partnerConnected
