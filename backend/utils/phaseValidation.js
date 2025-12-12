@@ -11,14 +11,20 @@
  * - Rule 2 (Hex value asc): "0x0C, 0x1A, 0x33, 0x7E, 0xB2, 0xFF"
  */
 export function validatePhase1(answer) {
-    // Normalize: remove spaces, convert to uppercase
+    // Normalize: remove spaces, keep case-insensitive comparison for hex digits
     const normalized = answer.toUpperCase().replace(/\s+/g, '');
 
-    // Accept both possible rule answers
-    const rule1Answer = '0xFF,0x7E,0xB2,0x33,0x1A,0x0C'; // Hamming weight desc
-    const rule2Answer = '0x0C,0x1A,0x33,0x7E,0xB2,0xFF'; // Hex value asc
+    // Accept both possible rule answers (both cases for 'x')
+    const rule1Answers = [
+        '0xFF,0x7E,0xB2,0x33,0x1A,0x0C',
+        '0XFF,0X7E,0XB2,0X33,0X1A,0X0C'
+    ];
+    const rule2Answers = [
+        '0x0C,0x1A,0x33,0x7E,0xB2,0xFF',
+        '0X0C,0X1A,0X33,0X7E,0XB2,0XFF'
+    ];
 
-    return normalized === rule1Answer || normalized === rule2Answer;
+    return rule1Answers.includes(normalized) || rule2Answers.includes(normalized);
 }
 
 /**
