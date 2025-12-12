@@ -1,13 +1,8 @@
 import { motion } from 'framer-motion';
 
 function Phase3({ playerRole }) {
-    // Process-Resource Graph
-    const processes = [
-        { id: 1, holds: 'R1', waits: 'R2' },
-        { id: 2, holds: 'R2', waits: 'R3' },
-        { id: 3, holds: 'R3', waits: 'R1' },
-        { id: 4, holds: 'R4', waits: 'R2' }, // Distractor - not in cycle
-    ];
+    const preorder = [8, 5, 2, 6, 10, 9, 11];
+    const inorder = [2, 5, 6, 8, 9, 10, 11];
 
     return (
         <div className="min-h-full">
@@ -15,131 +10,160 @@ function Phase3({ playerRole }) {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-5xl font-bold text-gate mb-8 text-center tracking-wider"
-                style={{ fontFamily: 'serif' }}
+                style={{ fontFamily: 'VT323, monospace' }}
             >
-                THE MEMORY LEAK
+                THE VINE ROOT
             </motion.h2>
 
             {playerRole === 'A' ? (
-                // Player A: The Eyes - Sees the Process-Resource Table
+                // Player A: The Eyes - Sees PREORDER Traversal
                 <div className="space-y-8 max-w-4xl mx-auto">
-                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
-                        💾 RESOURCE ALLOCATION TABLE
+                    <div className="text-[#00ffaa] text-2xl font-mono text-center mb-6">
+                        🌳 TREE DATA FRAGMENT A
                     </div>
 
-                    <div className="bg-black/60 border-4 border-gate p-8 rounded-lg">
-                        <table className="w-full text-center font-mono">
-                            <thead>
-                                <tr className="border-b-2 border-gate">
-                                    <th className="text-2xl text-green-500 p-4">PROCESS</th>
-                                    <th className="text-2xl text-yellow-500 p-4">HOLDS</th>
-                                    <th className="text-2xl text-red-500 p-4">WAITS FOR</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {processes.map((proc, index) => (
-                                    <motion.tr
-                                        key={proc.id}
-                                        initial={{ opacity: 0, x: -50 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.15 }}
-                                        className="border-b border-gray-700"
+                    {/* Preorder Sequence */}
+                    <div className="bg-black/60 border-4 border-green-500 p-8 rounded-lg">
+                        <div className="text-2xl text-green-500 font-bold mb-6 text-center font-mono">
+                            PREORDER TRAVERSAL
+                        </div>
+
+                        <div className="bg-black p-8 rounded-lg">
+                            <div className="flex justify-center items-center gap-4 flex-wrap">
+                                {preorder.map((node, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="relative"
                                     >
-                                        <td className="text-4xl text-green-500 p-6 font-bold">
-                                            P{proc.id}
-                                        </td>
-                                        <td className="text-4xl text-yellow-500 p-6">
-                                            {proc.holds}
-                                        </td>
-                                        <td className="text-4xl text-red-500 p-6">
-                                            {proc.waits}
-                                        </td>
-                                    </motion.tr>
+                                        <div className="bg-green-600/20 border-2 border-green-500 rounded-lg w-20 h-20 flex items-center justify-center">
+                                            <div className="text-4xl text-green-500 font-mono font-bold">
+                                                {node}
+                                            </div>
+                                        </div>
+                                        {index < preorder.length - 1 && (
+                                            <div className="absolute -right-6 top-1/2 transform -translate-y-1/2 text-green-500 text-2xl">
+                                                →
+                                            </div>
+                                        )}
+                                    </motion.div>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 text-center text-gray-400 font-mono text-sm">
+                            Visit order: Root → Left Subtree → Right Subtree
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-center font-mono">
-                        <div className="bg-green-500/20 border-2 border-green-500 p-4 rounded">
-                            <div className="text-green-500 text-lg mb-2">PROCESS</div>
-                            <div className="text-sm text-gray-400">Running program</div>
+                    {/* Info Box */}
+                    <div className="bg-green-500/10 border-2 border-green-500 p-6 rounded-lg">
+                        <div className="text-green-500 text-xl font-bold mb-3 font-mono">
+                            🌲 PREORDER DEFINITION
                         </div>
-                        <div className="bg-yellow-500/20 border-2 border-yellow-500 p-4 rounded">
-                            <div className="text-yellow-500 text-lg mb-2">HOLDS</div>
-                            <div className="text-sm text-gray-400">Resource currently locked</div>
-                        </div>
-                        <div className="bg-red-500/20 border-2 border-red-500 p-4 rounded col-span-2">
-                            <div className="text-red-500 text-lg mb-2">WAITS FOR</div>
-                            <div className="text-sm text-gray-400">Resource needed to proceed</div>
+                        <div className="text-white font-mono space-y-2 text-sm">
+                            <div>1. Visit the ROOT node first</div>
+                            <div>2. Recursively traverse LEFT subtree</div>
+                            <div>3. Recursively traverse RIGHT subtree</div>
+                            <div className="text-gray-400 mt-3">
+                                This sequence shows the order nodes were visited.
+                            </div>
                         </div>
                     </div>
 
                     <div className="text-center text-gray-400 font-mono">
-                        ⚠️ DESCRIBE THE DEPENDENCY CHAIN TO YOUR PARTNER
+                        ⚠️ SHARE THIS SEQUENCE WITH YOUR PARTNER
                     </div>
                 </div>
             ) : (
-                // Player B: The Brain - Gets the Cycle Detection Formula
-                <div className="space-y-8 max-w-3xl mx-auto">
-                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
-                        🧠 DEADLOCK DETECTION PROTOCOL
+                // Player B: The Brain - Sees INORDER Traversal + Question
+                <div className="space-y-8 max-w-4xl mx-auto">
+                    <div className="text-[#ff0055] text-2xl font-mono text-center mb-6">
+                        🧠 TREE DATA FRAGMENT B
                     </div>
 
-                    <div className="bg-black/60 border-4 border-red-500 p-8 rounded-lg">
-                        <div className="text-3xl text-red-500 font-bold mb-6 text-center font-mono">
-                            ⚠️ SYSTEM DEADLOCK DETECTED
+                    {/* Inorder Sequence */}
+                    <div className="bg-black/60 border-4 border-[#ff0055] p-8 rounded-lg">
+                        <div className="text-2xl text-[#ff0055] font-bold mb-6 text-center font-mono">
+                            INORDER TRAVERSAL
                         </div>
-                        <div className="text-gray-300 text-lg font-mono text-center">
-                            One or more processes are in a circular wait state
+
+                        <div className="bg-black p-8 rounded-lg">
+                            <div className="flex justify-center items-center gap-4 flex-wrap">
+                                {inorder.map((node, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="relative"
+                                    >
+                                        <div className="bg-[#ff0055]/20 border-2 border-[#ff0055] rounded-lg w-20 h-20 flex items-center justify-center">
+                                            <div className="text-4xl text-[#ff0055] font-mono font-bold">
+                                                {node}
+                                            </div>
+                                        </div>
+                                        {index < inorder.length - 1 && (
+                                            <div className="absolute -right-6 top-1/2 transform -translate-y-1/2 text-[#ff0055] text-2xl">
+                                                →
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="mt-6 text-center text-gray-400 font-mono text-sm">
+                            Visit order: Left Subtree → Root → Right Subtree
                         </div>
                     </div>
 
-                    <div className="space-y-4 text-white font-mono">
-                        <div className="bg-mindflayer/20 p-6 rounded-lg border-2 border-mindflayer">
-                            <div className="text-2xl text-mindflayer font-bold mb-4">TASK</div>
-                            <div className="space-y-3 text-lg">
-                                <div>1. Identify the <span className="text-red-500 font-bold">CIRCULAR DEPENDENCY LOOP</span></div>
-                                <div>2. Find which processes are in the deadlock</div>
-                                <div>3. Calculate the "kill cost" using the formula below</div>
+                    {/* Info Box */}
+                    <div className="bg-[#ff0055]/10 border-2 border-[#ff0055] p-6 rounded-lg">
+                        <div className="text-[#ff0055] text-xl font-bold mb-3 font-mono">
+                            🌲 INORDER DEFINITION
+                        </div>
+                        <div className="text-white font-mono space-y-2 text-sm">
+                            <div>1. Recursively traverse LEFT subtree</div>
+                            <div>2. Visit the ROOT node</div>
+                            <div>3. Recursively traverse RIGHT subtree</div>
+                            <div className="text-gray-400 mt-3">
+                                For a Binary Search Tree, this gives sorted order.
                             </div>
                         </div>
+                    </div>
 
-                        <div className="bg-black/40 p-6 rounded-lg border-2 border-gate">
-                            <div className="text-xl text-gate font-bold mb-4">WHAT IS A CIRCULAR DEPENDENCY?</div>
-                            <div className="space-y-2 text-lg">
-                                <div>• Process A waits for Resource X</div>
-                                <div>• Resource X is held by Process B</div>
-                                <div>• Process B waits for Resource Y</div>
-                                <div>• Resource Y is held by Process A</div>
-                                <div className="text-red-500 mt-2">→ Deadlock! Neither can proceed.</div>
-                            </div>
+                    {/* Algorithm Hint */}
+                    <div className="bg-black/60 border-4 border-yellow-500 p-6 rounded-lg">
+                        <div className="text-xl text-yellow-500 font-bold mb-4 font-mono">
+                            💡 RECONSTRUCTION ALGORITHM
                         </div>
-
-                        <div className="bg-black/40 p-6 rounded-lg border-2 border-yellow-500">
-                            <div className="text-xl text-yellow-500 font-bold mb-4">⚠️ DISTRACTOR WARNING</div>
-                            <div className="text-lg">
-                                Not all processes may be in the loop!
-                            </div>
-                            <div className="text-sm text-gray-400 mt-2">
-                                A process that waits for a resource in the loop but isn't waited on by the loop is <span className="text-red-500">NOT part of the cycle</span>
-                            </div>
+                        <div className="text-white font-mono text-sm space-y-2">
+                            <div>1. First element of PREORDER = ROOT</div>
+                            <div>2. Find ROOT in INORDER → splits into left/right</div>
+                            <div>3. Elements left of ROOT in Inorder = Left Subtree</div>
+                            <div>4. Elements right of ROOT in Inorder = Right Subtree</div>
+                            <div>5. Recursively rebuild each subtree</div>
                         </div>
+                    </div>
 
-                        <div className="bg-black/40 p-8 rounded-lg border-4 border-green-500">
-                            <div className="text-2xl text-green-500 font-bold mb-4 text-center">KILL COST FORMULA</div>
-                            <div className="bg-black p-6 rounded text-3xl text-center text-yellow-500 font-bold mb-4">
-                                (Sum of Process IDs in Cycle) × (Number of Nodes)
+                    {/* Question */}
+                    <div className="bg-black/60 border-4 border-green-500 p-8 rounded-lg">
+                        <div className="text-2xl text-green-500 font-bold mb-6 text-center font-mono">
+                            📝 THE QUESTION
+                        </div>
+                        <div className="text-white font-mono text-xl text-center space-y-4">
+                            <div>Using both traversals to reconstruct the tree:</div>
+                            <div className="text-[#00ffaa] text-3xl font-bold">
+                                IDENTIFY THE LEFT CHILD OF NODE 10
                             </div>
-                            {/* <div className="text-lg text-gray-400 text-center">
-                                Example: If P1, P2, P3 are in the cycle:<br />
-                                (1 + 2 + 3) × 3 = <span className="text-green-500 font-bold">18</span>
-                            </div> */}
                         </div>
                     </div>
 
                     <div className="text-center text-gray-400 font-mono text-lg mt-6">
-                        📝 SUBMIT FORMAT: Integer (e.g., "73")
+                        📝 SUBMIT FORMAT: Single number (e.g., "9")
                     </div>
                 </div>
             )}

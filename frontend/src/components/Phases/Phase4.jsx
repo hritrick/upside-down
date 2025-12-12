@@ -1,20 +1,24 @@
 import { motion } from 'framer-motion';
 
 function Phase4({ playerRole }) {
-    // Network graph: nodes and edges with capacities
+    // Graph nodes
     const nodes = [
-        { id: 'S', x: 100, y: 150, label: 'SOURCE', color: '#00ff00' },
-        { id: 'A', x: 250, y: 80, label: 'NODE A', color: '#6A0DAD' },
-        { id: 'B', x: 250, y: 220, label: 'NODE B', color: '#6A0DAD' },
-        { id: 'T', x: 400, y: 150, label: 'SINK', color: '#ff0000' },
+        { id: 'A', x: 150, y: 100, label: 'NODE A' },
+        { id: 'B', x: 350, y: 100, label: 'NODE B' },
+        { id: 'C', x: 150, y: 250, label: 'NODE C' },
+        { id: 'D', x: 350, y: 250, label: 'NODE D' },
+        { id: 'E', x: 250, y: 350, label: 'NODE E' },
     ];
 
+    // Original edges
     const edges = [
-        { from: 'S', to: 'A', capacity: 10, x1: 100, y1: 150, x2: 250, y2: 80, original: true },
-        { from: 'S', to: 'B', capacity: 5, x1: 100, y1: 150, x2: 250, y2: 220, modified: 'LEAK: 10→5' },
-        { from: 'A', to: 'B', capacity: 2, x1: 250, y1: 80, x2: 250, y2: 220, original: true },
-        { from: 'A', to: 'T', capacity: 4, x1: 250, y1: 80, x2: 400, y2: 150, modified: 'CORRODED: 8→4' },
-        { from: 'B', to: 'T', capacity: 9, x1: 250, y1: 220, x2: 400, y2: 150, original: true },
+        { from: 'A', to: 'B', weight: 1, x1: 150, y1: 100, x2: 350, y2: 100, broken: true },
+        { from: 'A', to: 'C', weight: 7, x1: 150, y1: 100, x2: 150, y2: 250, modified: 3 },
+        { from: 'B', to: 'C', weight: 5, x1: 350, y1: 100, x2: 150, y2: 250 },
+        { from: 'B', to: 'D', weight: 4, x1: 350, y1: 100, x2: 350, y2: 250 },
+        { from: 'B', to: 'E', weight: 3, x1: 350, y1: 100, x2: 250, y2: 350 },
+        { from: 'D', to: 'E', weight: 6, x1: 350, y1: 250, x2: 250, y2: 350 },
+        { from: 'C', to: 'E', weight: 2, x1: 150, y1: 250, x2: 250, y2: 350 },
     ];
 
     return (
@@ -23,187 +27,207 @@ function Phase4({ playerRole }) {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-5xl font-bold text-gate mb-8 text-center tracking-wider"
-                style={{ fontFamily: 'serif' }}
+                style={{ fontFamily: 'VT323, monospace' }}
             >
-                THE POWER GRID
+                THE HIVE WEB
             </motion.h2>
 
             {playerRole === 'A' ? (
-                // Player A: The Eyes - Sees the Network Graph
+                // Player A: The Eyes - Sees the Graph Visualization
                 <div className="space-y-8">
-                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
-                        ⚡ ENERGY DISTRIBUTION NETWORK
+                    <div className="text-[#00ffaa] text-2xl font-mono text-center mb-6">
+                        🕸️ NEURAL CONNECTION MAP
                     </div>
 
-                    <div className="bg-black/60 border-4 border-gate p-8 rounded-lg max-w-4xl mx-auto">
-                        <svg viewBox="0 0 500 300" className="w-full h-full">
-                            {/* Edges */}
+                    {/* Graph Visualization */}
+                    <div className="bg-black/60 border-4 border-green-500 p-8 rounded-lg max-w-4xl mx-auto">
+                        <svg viewBox="0 0 500 450" className="w-full h-full">
+                            {/* Draw edges first */}
                             {edges.map((edge, index) => (
-                                <g key={index}>
+                                <g key={`edge-${index}`}>
                                     <motion.line
                                         x1={edge.x1}
                                         y1={edge.y1}
                                         x2={edge.x2}
                                         y2={edge.y2}
-                                        stroke={edge.modified ? '#ff0000' : '#00ff00'}
-                                        strokeWidth="3"
+                                        stroke={edge.broken ? '#ff0000' : edge.modified ? '#ffaa00' : '#00ff00'}
+                                        strokeWidth={edge.broken ? '4' : '3'}
+                                        strokeDasharray={edge.broken ? '10,5' : '0'}
                                         initial={{ pathLength: 0 }}
                                         animate={{ pathLength: 1 }}
-                                        transition={{ duration: 1, delay: index * 0.2 }}
+                                        transition={{ duration: 1, delay: index * 0.1 }}
                                     />
-                                    {/* Capacity Label */}
+
+                                    {/* Weight label */}
                                     <motion.text
                                         x={(edge.x1 + edge.x2) / 2}
                                         y={(edge.y1 + edge.y2) / 2 - 10}
-                                        fill={edge.modified ? '#ff0000' : '#00ff00'}
-                                        fontSize="20"
-                                        fontFamily="Source Code Pro, monospace"
+                                        fill={edge.broken ? '#ff0000' : edge.modified ? '#ffaa00' : '#00ff00'}
+                                        fontSize="24"
+                                        fontFamily="VT323, monospace"
                                         fontWeight="bold"
                                         textAnchor="middle"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        transition={{ delay: index * 0.2 + 0.5 }}
+                                        transition={{ delay: index * 0.1 + 0.5 }}
                                     >
-                                        {edge.capacity}
+                                        {edge.broken ? '∞' : edge.modified || edge.weight}
                                     </motion.text>
-                                    {/* Arrow */}
-                                    <motion.circle
-                                        cx={(edge.x1 + edge.x2) / 2 + 20}
-                                        cy={(edge.y1 + edge.y2) / 2}
-                                        r="4"
-                                        fill={edge.modified ? '#ff0000' : '#00ff00'}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: index * 0.2 + 0.5 }}
-                                    />
+
+                                    {/* Status indicator */}
+                                    {(edge.broken || edge.modified) && (
+                                        <motion.text
+                                            x={(edge.x1 + edge.x2) / 2}
+                                            y={(edge.y1 + edge.y2) / 2 + 20}
+                                            fill={edge.broken ? '#ff0000' : '#ffaa00'}
+                                            fontSize="14"
+                                            fontFamily="monospace"
+                                            textAnchor="middle"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: [0, 1, 0] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                        >
+                                            {edge.broken ? 'BROKEN' : 'MODIFIED'}
+                                        </motion.text>
+                                    )}
                                 </g>
                             ))}
 
-                            {/* Nodes */}
+                            {/* Draw nodes */}
                             {nodes.map((node, index) => (
-                                <g key={node.id}>
+                                <g key={`node-${node.id}`}>
                                     <motion.circle
                                         cx={node.x}
                                         cy={node.y}
-                                        r="30"
-                                        fill={node.color}
-                                        stroke="#ffffff"
-                                        strokeWidth="3"
+                                        r="35"
+                                        fill="#6A0DAD"
+                                        stroke="#00ffaa"
+                                        strokeWidth="4"
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
                                         transition={{ delay: index * 0.15, type: 'spring' }}
                                     />
                                     <text
                                         x={node.x}
-                                        y={node.y + 5}
-                                        fill="#000"
-                                        fontSize="20"
+                                        y={node.y + 7}
+                                        fill="#ffffff"
+                                        fontSize="30"
                                         fontWeight="bold"
                                         textAnchor="middle"
-                                        fontFamily="Source Code Pro, monospace"
+                                        fontFamily="VT323, monospace"
                                     >
                                         {node.id}
-                                    </text>
-                                    <text
-                                        x={node.x}
-                                        y={node.y + 55}
-                                        fill="#ffffff"
-                                        fontSize="12"
-                                        textAnchor="middle"
-                                        fontFamily="Source Code Pro, monospace"
-                                    >
-                                        {node.label}
                                     </text>
                                 </g>
                             ))}
                         </svg>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto font-mono">
-                        <div className="bg-green-500/20 border-2 border-green-500 p-4 rounded text-center">
-                            <div className="text-green-500 text-lg mb-2">NORMAL PIPE</div>
-                            <div className="text-sm text-gray-400">Full capacity available</div>
+                    {/* Legend */}
+                    <div className="grid grid-cols-3 gap-4 max-w-4xl mx-auto font-mono text-sm">
+                        <div className="bg-green-500/20 border-2 border-green-500 p-3 rounded text-center">
+                            <div className="text-green-500 font-bold mb-1">NORMAL</div>
+                            <div className="text-gray-400">Original weight</div>
                         </div>
-                        <div className="bg-red-500/20 border-2 border-red-500 p-4 rounded text-center">
-                            <div className="text-red-500 text-lg mb-2">DAMAGED PIPE</div>
-                            <div className="text-sm text-gray-400">Reduced capacity</div>
+                        <div className="bg-yellow-500/20 border-2 border-yellow-500 p-3 rounded text-center">
+                            <div className="text-yellow-500 font-bold mb-1">MODIFIED</div>
+                            <div className="text-gray-400">Weight changed</div>
+                        </div>
+                        <div className="bg-red-500/20 border-2 border-red-500 p-3 rounded text-center">
+                            <div className="text-red-500 font-bold mb-1">BROKEN</div>
+                            <div className="text-gray-400">Infinite weight</div>
                         </div>
                     </div>
 
                     <div className="text-center text-gray-400 font-mono">
-                        ⚠️ DESCRIBE THE NETWORK STRUCTURE TO YOUR PARTNER
+                        ⚠️ DESCRIBE THE GRAPH STRUCTURE TO YOUR PARTNER
                     </div>
                 </div>
             ) : (
-                // Player B: The Brain - Gets the Blockages and Formula
+                // Player B: The Brain - Gets Intel Report + MST Question
                 <div className="space-y-8 max-w-3xl mx-auto">
-                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
-                        🧠 MAX FLOW CALCULATION
+                    <div className="text-[#ff0055] text-2xl font-mono text-center mb-6">
+                        🧠 NETWORK ANALYSIS
                     </div>
 
+                    {/* Intel Report */}
                     <div className="bg-black/60 border-4 border-red-500 p-6 rounded-lg">
                         <div className="text-2xl text-red-500 font-bold mb-4 text-center font-mono">
-                            ⚠️ SYSTEM DAMAGE REPORT
+                            🩸 INTEL UPDATE
                         </div>
-                        <div className="space-y-3 text-white text-lg font-mono">
-                            <div className="bg-red-500/20 p-4 rounded border-2 border-red-500">
-                                <strong>PIPE A→T:</strong> CORRODED<br />
-                                <span className="text-yellow-500">Max capacity reduced: 8 → 4</span>
+                        <div className="space-y-4">
+                            <div className="bg-red-600/20 border-2 border-red-600 p-4 rounded">
+                                <div className="text-red-500 font-mono text-lg font-bold">
+                                    ⚠️ CONNECTION A-B IS BROKEN
+                                </div>
+                                <div className="text-gray-400 text-sm mt-2">
+                                    Weight: 1 → ∞ (Unusable)
+                                </div>
                             </div>
-                            <div className="bg-red-500/20 p-4 rounded border-2 border-red-500">
-                                <strong>PIPE S→B:</strong> LEAK DETECTED<br />
-                                <span className="text-yellow-500">Max capacity reduced: 10 → 5</span>
+                            <div className="bg-yellow-500/20 border-2 border-yellow-500 p-4 rounded">
+                                <div className="text-yellow-500 font-mono text-lg font-bold">
+                                    🔧 CONNECTION A-C REINFORCED
+                                </div>
+                                <div className="text-gray-400 text-sm mt-2">
+                                    Weight: 7 → 3 (Reduced)
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-4 text-white font-mono">
-                        <div className="bg-mindflayer/20 p-6 rounded-lg border-2 border-mindflayer">
-                            <div className="text-2xl text-mindflayer font-bold mb-4">TASK</div>
-                            <div className="space-y-3 text-lg">
-                                <div>Calculate the <span className="text-green-500 font-bold">MAXIMUM FLOW</span> from SOURCE (S) to SINK (T)</div>
-                                <div className="text-sm text-gray-400">Given the capacity constraints and damage reports</div>
-                            </div>
+                    {/* Original Edges Table */}
+                    <div className="bg-black/60 border-4 border-[#00ffaa] p-6 rounded-lg">
+                        <div className="text-xl text-[#00ffaa] font-bold mb-4 font-mono">
+                            📊 ORIGINAL CONNECTION WEIGHTS
                         </div>
-
-                        <div className="bg-black/40 p-6 rounded-lg border-2 border-gate">
-                            <div className="text-xl text-gate font-bold mb-4">ORIGINAL NETWORK</div>
-                            <div className="space-y-2 text-lg">
-                                <div>• S→A: <span className="text-yellow-500">10</span></div>
-                                <div>• S→B: <span className="text-red-500 line-through">10</span> → <span className="text-yellow-500">5</span></div>
-                                <div>• A→B: <span className="text-yellow-500">2</span></div>
-                                <div>• A→T: <span className="text-red-500 line-through">8</span> → <span className="text-yellow-500">4</span></div>
-                                <div>• B→T: <span className="text-yellow-500">9</span></div>
-                            </div>
+                        <div className="grid grid-cols-2 gap-2 font-mono text-sm">
+                            <div className="bg-black p-2 rounded">A-B: <span className="text-red-500 line-through">1</span> → <span className="text-red-600">∞</span></div>
+                            <div className="bg-black p-2 rounded">A-C: <span className="text-yellow-500 line-through">7</span> → <span className="text-green-500">3</span></div>
+                            <div className="bg-black p-2 rounded">B-C: <span className="text-green-500">5</span></div>
+                            <div className="bg-black p-2 rounded">B-D: <span className="text-green-500">4</span></div>
+                            <div className="bg-black p-2 rounded">B-E: <span className="text-green-500">3</span></div>
+                            <div className="bg-black p-2 rounded">D-E: <span className="text-green-500">6</span></div>
+                            <div className="bg-black p-2 rounded">C-E: <span className="text-green-500">2</span></div>
                         </div>
+                    </div>
 
-                        <div className="bg-black/40 p-8 rounded-lg border-4 border-green-500">
-                            <div className="text-2xl text-green-500 font-bold mb-4 text-center">MAX FLOW ALGORITHM</div>
-                            <div className="space-y-4 text-lg">
-                                <div>
-                                    <strong className="text-yellow-500">STEP 1:</strong> Find all possible paths from S to T
-                                </div>
-                                <div>
-                                    <strong className="text-yellow-500">STEP 2:</strong> For each path, find the minimum capacity (bottleneck)
-                                </div>
-                                <div>
-                                    <strong className="text-yellow-500">STEP 3:</strong> Sum the flow from all paths
-                                </div>
-                                <div className="bg-black p-4 rounded mt-4 text-sm text-gray-400">
-                                    Example Path: S→A→T<br />
-                                    Capacities: min(10, 4) = 4 units
+                    {/* MST Algorithm */}
+                    <div className="bg-black/60 border-4 border-[#ff0055] p-8 rounded-lg">
+                        <div className="text-2xl text-[#ff0055] font-bold mb-4 text-center font-mono">
+                            MINIMUM SPANNING TREE
+                        </div>
+                        <div className="text-white font-mono space-y-3 text-sm">
+                            <div className="bg-[#ff0055]/10 p-3 rounded">
+                                <strong>GOAL:</strong> Connect all 5 nodes with minimum total weight
+                            </div>
+                            <div className="bg-[#ff0055]/10 p-3 rounded">
+                                <strong>RULES:</strong> No cycles, must use exactly 4 edges
+                            </div>
+                            <div className="bg-[#ff0055]/10 p-3 rounded">
+                                <strong>ALGORITHM:</strong> Kruskal's or Prim's
+                                <div className="text-xs text-gray-400 mt-1">
+                                    Sort edges by weight, pick smallest without cycles
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="bg-yellow-500/20 border-2 border-yellow-500 p-4 rounded">
-                            <div className="text-yellow-500 font-bold text-lg mb-2">💡 HINT</div>
-                            <div>After using a path, subtract its flow from shared edges before finding the next path</div>
+                    {/* Question */}
+                    <div className="bg-black/60 border-4 border-green-500 p-8 rounded-lg">
+                        <div className="text-2xl text-green-500 font-bold mb-6 text-center font-mono">
+                            📝 THE QUESTION
+                        </div>
+                        <div className="text-white font-mono text-xl text-center space-y-4">
+                            <div>After applying the intel updates:</div>
+                            <div className="text-[#00ffaa] text-3xl font-bold">
+                                CALCULATE TOTAL WEIGHT OF THE<br />
+                                NEW MINIMUM SPANNING TREE
+                            </div>
                         </div>
                     </div>
 
                     <div className="text-center text-gray-400 font-mono text-lg mt-6">
-                        📝 SUBMIT FORMAT: Integer (e.g., "45")
+                        📝 SUBMIT FORMAT: Integer (e.g., "12")
                     </div>
                 </div>
             )}

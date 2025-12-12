@@ -1,25 +1,10 @@
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 function Phase2({ playerRole }) {
-    const [showHint, setShowHint] = useState(false);
-
-    // The 5x5 matrix (row-wise and column-wise sorted)
-    const matrix = [
-        [10, 20, 30, 40, 50],
-        [15, 25, 35, 45, 55],
-        [27, 37, 47, 57, 67],
-        [32, 42, 52, 62, 72],
-        [38, 48, 58, 68, 78]
-    ];
-
-    const target = 47;
-
-    // Mask function: shows like "4?" for value 47
-    const maskValue = (value) => {
-        const str = String(value);
-        return str.charAt(0) + '{?}';
-    };
+    // Hash table: 10 slots (0-9), indices 2 and 5 are blocked
+    const tableSize = 10;
+    const blockedIndices = [2, 5];
+    const keysToInsert = [42, 12, 32];
 
     return (
         <div className="min-h-full">
@@ -27,159 +12,152 @@ function Phase2({ playerRole }) {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-5xl font-bold text-gate mb-8 text-center tracking-wider"
-                style={{ fontFamily: 'serif' }}
+                style={{ fontFamily: 'VT323, monospace' }}
             >
-                THE GLITCHED MATRIX
+                THE HASH CHAMBER
             </motion.h2>
 
             {playerRole === 'A' ? (
-                // Player A: The Eyes - Sees the Masked Matrix
+                // Player A: The Eyes - Sees the Hash Table Grid
                 <div className="space-y-8">
-                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
-                        🔲 CORRUPTED DATA GRID
+                    <div className="text-[#00ffaa] text-2xl font-mono text-center mb-6">
+                        🔲 HASH TABLE STORAGE (INDICES 0-9)
                     </div>
 
-                    <div className="bg-black/60 border-4 border-gate p-8 rounded-lg max-w-3xl mx-auto">
-                        {/* Matrix Grid */}
-                        <div className="grid grid-cols-5 gap-3">
-                            {matrix.map((row, rowIndex) => (
-                                row.map((value, colIndex) => (
-                                    <motion.div
-                                        key={`${rowIndex}-${colIndex}`}
-                                        initial={{ opacity: 0, scale: 0.5 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: (rowIndex * 5 + colIndex) * 0.03 }}
-                                        whileHover={{ scale: 1.1, boxShadow: '0 0 25px #8B0000' }}
-                                        className="bg-black/80 border-2 border-green-500 p-4 rounded aspect-square flex items-center justify-center relative"
-                                    >
-                                        <div className="text-3xl font-mono text-green-500 font-bold"
-                                            style={{ fontFamily: 'Source Code Pro, Consolas, monospace' }}>
-                                            {maskValue(value)}
-                                        </div>
-                                        {/* No row/col labels for Player A */}
-                                    </motion.div>
-                                ))
+                    {/* Hash Table Grid */}
+                    <div className="max-w-5xl mx-auto">
+                        <div className="grid grid-cols-10 gap-3">
+                            {Array.from({ length: tableSize }).map((_, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className={`
+                                        relative aspect-square flex flex-col items-center justify-center
+                                        border-4 rounded-lg font-mono
+                                        ${blockedIndices.includes(index)
+                                            ? 'bg-red-900/40 border-red-600'
+                                            : 'bg-black/60 border-green-500'
+                                        }
+                                    `}
+                                >
+                                    {/* Index Label */}
+                                    <div className={`text-sm ${blockedIndices.includes(index) ? 'text-red-400' : 'text-gray-400'}`}>
+                                        [{index}]
+                                    </div>
+
+                                    {/* Content */}
+                                    {blockedIndices.includes(index) ? (
+                                        <div className="text-4xl text-red-600 font-bold">❌</div>
+                                    ) : (
+                                        <div className="text-3xl text-green-500">[ ]</div>
+                                    )}
+
+                                    {/* Status */}
+                                    {blockedIndices.includes(index) && (
+                                        <motion.div
+                                            animate={{ opacity: [1, 0.5, 1] }}
+                                            transition={{ duration: 1, repeat: Infinity }}
+                                            className="text-[10px] text-red-500 absolute bottom-1"
+                                        >
+                                            BLOCKED
+                                        </motion.div>
+                                    )}
+                                </motion.div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="bg-red-500/20 border-2 border-red-500 p-6 rounded-lg max-w-3xl mx-auto">
-                        <div className="text-red-500 text-2xl font-bold mb-3 text-center font-mono">
-                            ⚠️ DATA CORRUPTION DETECTED
+                    <div className="bg-[#00ffaa]/10 border-2 border-[#00ffaa] p-6 rounded-lg max-w-3xl mx-auto">
+                        <div className="text-[#00ffaa] text-xl font-bold mb-3 font-mono">
+                            ⚠️ TABLE STATUS
                         </div>
-                        <div className="text-white font-mono text-lg">
-                            • All values are MASKED with {'{?}'}<br />
-                            • Grid structure: 5 rows × 5 columns<br />
-                            • Each cell shows first digit + {'{?}'}
+                        <div className="text-white font-mono space-y-2">
+                            • Total slots: <span className="text-[#00ffaa]">10 (0-9)</span><br />
+                            • Blocked slots: <span className="text-red-500">Index 2, Index 5</span><br />
+                            • Available slots: <span className="text-green-500">8</span>
                         </div>
-                    </div>
-
-                    <div className="text-center">
-                        <button
-                            onClick={() => setShowHint(!showHint)}
-                            className="bg-mindflayer border-2 border-mindflayer px-6 py-3 rounded font-mono text-white hover:bg-mindflayer/80"
-                        >
-                            {showHint ? 'HIDE' : 'SHOW'} COORDINATE SYSTEM
-                        </button>
-
-                        {showHint && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mt-4 bg-black/60 border-2 border-yellow-500 p-4 rounded-lg max-w-md mx-auto font-mono text-sm text-yellow-500"
-                            >
-                                Grid positions: Row 0-4, Column 0-4<br />
-                                Format: (Row, Column)<br />
-                                Top-Left = (0,0), Top-Right = (0,4)
-                            </motion.div>
-                        )}
                     </div>
 
                     <div className="text-center text-gray-400 font-mono">
-                        ⚠️ DESCRIBE CELL POSITIONS AND VALUES TO YOUR PARTNER
+                        ⚠️ DESCRIBE THE TABLE LAYOUT TO YOUR PARTNER
                     </div>
                 </div>
             ) : (
-                // Player B: The Brain - Gets the Decryption Formula and Algorithm
+                // Player B: The Brain - Gets the Insertion Rules
                 <div className="space-y-8 max-w-3xl mx-auto">
-                    <div className="text-mindflayer text-2xl font-mono text-center mb-6">
-                        🧠 DECRYPTION PROTOCOL
+                    <div className="text-[#ff0055] text-2xl font-mono text-center mb-6">
+                        🧠 INSERTION PROTOCOL
                     </div>
 
-                    {/* Target */}
-                    <div className="bg-black/60 border-4 border-green-500 p-6 rounded-lg text-center">
-                        <div className="text-lg text-gray-400 font-mono mb-2">TARGET VALUE:</div>
-                        <div className="text-7xl font-bold text-green-500 font-mono">{target}</div>
-                    </div>
-
-                    {/* Decryption Key */}
-                    <div className="bg-black/60 border-4 border-yellow-500 p-6 rounded-lg">
-                        <div className="text-2xl text-yellow-500 font-bold mb-4 text-center font-mono">
-                            🔑 DECRYPTION KEY
+                    {/* Keys to Insert */}
+                    <div className="bg-black/60 border-4 border-[#00ffaa] p-6 rounded-lg">
+                        <div className="text-xl text-[#00ffaa] font-bold mb-4 font-mono">
+                            KEYS TO INSERT (IN ORDER):
                         </div>
                         <div className="bg-black p-6 rounded text-center">
-                            <div className="text-xl text-white font-mono mb-4">
-                                Each cell shows: <span className="text-green-500">First_Digit</span>{'{?}'}
+                            <div className="text-5xl text-green-500 font-mono font-bold">
+                                [ {keysToInsert.join(', ')} ]
                             </div>
-                            <div className="text-3xl text-yellow-500 font-bold font-mono">
-                                ? = Row + Column
+                        </div>
+                    </div>
+
+                    {/* Hash Rule */}
+                    <div className="bg-black/60 border-4 border-[#ff0055] p-6 rounded-lg">
+                        <div className="text-2xl text-[#ff0055] font-bold mb-4 text-center font-mono">
+                            HASH FUNCTION
+                        </div>
+                        <div className="bg-black p-6 rounded text-center">
+                            <div className="text-4xl text-yellow-500 font-mono font-bold">
+                                Index = Key % 10
                             </div>
                             <div className="text-sm text-gray-400 mt-4">
-                                Example: Cell (2,2) shows "4{'{?}'}"<br />
-                                ? = 2 + 2 = 4, but wait... that would be "44"<br />
-                                The actual formula calculates the last digit!
+                                Example: 42 % 10 = 2
                             </div>
                         </div>
                     </div>
 
-                    {/* Matrix Properties */}
-                    <div className="bg-mindflayer/20 p-6 rounded-lg border-2 border-mindflayer">
-                        <div className="text-2xl text-mindflayer font-bold mb-4">MATRIX PROPERTIES</div>
-                        <div className="space-y-3 text-lg text-white font-mono">
-                            <div>• Each ROW is sorted (left → right): increasing</div>
-                            <div>• Each COLUMN is sorted (top → down): increasing</div>
-                            <div>• This allows for efficient staircase search</div>
+                    {/* Collision Protocol */}
+                    <div className="bg-black/60 border-4 border-red-500 p-8 rounded-lg">
+                        <div className="text-2xl text-red-500 font-bold mb-4 text-center font-mono">
+                            ⚠️ COLLISION RESOLUTION
                         </div>
-                    </div>
-
-                    {/* Search Algorithm */}
-                    <div className="bg-black/40 p-8 rounded-lg border-4 border-gate">
-                        <div className="text-2xl text-gate font-bold mb-4 text-center">STAIRCASE SEARCH ALGORITHM</div>
-                        <div className="space-y-4 text-lg text-white font-mono">
-                            <div className="bg-green-500/20 p-4 rounded border-2 border-green-500">
-                                <strong className="text-green-500">STEP 1:</strong> Start at TOP-RIGHT cell (0,4)
+                        <div className="bg-black p-6 rounded space-y-4">
+                            <div className="text-xl text-white font-mono text-center">
+                                QUADRATIC PROBING
                             </div>
-                            <div className="bg-yellow-500/20 p-4 rounded border-2 border-yellow-500">
-                                <strong className="text-yellow-500">STEP 2:</strong> Compare current cell value with target:
-                                <div className="ml-4 mt-2 text-sm">
-                                    • If current &gt; target → Move LEFT (col--)<br />
-                                    • If current &lt; target → Move DOWN (row++)<br />
-                                    • If current == target → FOUND!
+                            <div className="text-3xl text-[#00ffaa] font-bold text-center font-mono">
+                                (Base_Index + n²) % 10
+                            </div>
+                            <div className="text-sm text-gray-400 mt-4 space-y-2">
+                                <div>• n = attempt number (1, 2, 3...)</div>
+                                <div>• If slot is blocked or occupied, try next n</div>
+                                <div className="text-yellow-500 mt-2">
+                                    Example: If base=2 is blocked:<br />
+                                    Try (2 + 1²) % 10 = 3<br />
+                                    Try (2 + 2²) % 10 = 6<br />
+                                    Try (2 + 3²) % 10 = 1...
                                 </div>
                             </div>
-                            <div className="bg-red-500/20 p-4 rounded border-2 border-red-500">
-                                <strong className="text-red-500">STEP 3:</strong> Record EVERY step of your path
-                            </div>
                         </div>
                     </div>
 
-                    {/* Path Format */}
+                    {/* Question */}
                     <div className="bg-black/60 border-4 border-green-500 p-6 rounded-lg">
-                        <div className="text-xl text-green-500 font-bold mb-4 text-center">PATH SUBMISSION FORMAT</div>
-                        <div className="text-white font-mono text-lg space-y-2">
-                            <div>Submit the coordinate path you traced:</div>
-                            <div className="bg-black p-4 rounded mt-2 text-yellow-500">
-                                Format: RC-RC-RC-RC-RC<br />
-                                Example: 04-03-02-12-22
-                            </div>
-                            <div className="text-sm text-gray-400">
-                                Where RC = RowColumn (single digits, no separators within coordinate)
-                            </div>
+                        <div className="text-xl text-green-500 font-bold mb-4 text-center font-mono">
+                            📝 THE QUESTION
+                        </div>
+                        <div className="text-white font-mono text-lg text-center">
+                            After inserting all 3 keys using the rules above,<br />
+                            <span className="text-[#ff0055] text-2xl font-bold">
+                                what is the FINAL INDEX of key 32?
+                            </span>
                         </div>
                     </div>
 
                     <div className="text-center text-gray-400 font-mono text-lg mt-6">
-                        📝 SUBMIT FORMAT: "04-03-02-12-22"
+                        📝 SUBMIT FORMAT: Single digit (0-9)
                     </div>
                 </div>
             )}
