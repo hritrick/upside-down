@@ -1,238 +1,137 @@
-import { motion } from 'framer-motion';
+import React from 'react';
 
-function Phase4({ playerRole }) {
-    // Graph nodes
-    const nodes = [
-        { id: 'A', x: 150, y: 100, label: 'NODE A' },
-        { id: 'B', x: 350, y: 100, label: 'NODE B' },
-        { id: 'C', x: 150, y: 250, label: 'NODE C' },
-        { id: 'D', x: 350, y: 250, label: 'NODE D' },
-        { id: 'E', x: 250, y: 350, label: 'NODE E' },
-    ];
+const Phase4 = ({ role }) => {
+    // 1. Fixed Node Positions (Percentage)
+    const nodes = {
+        A: { x: 20, y: 20 },
+        B: { x: 80, y: 20 },
+        C: { x: 20, y: 80 },
+        D: { x: 80, y: 80 },
+        E: { x: 50, y: 50 } // Center
+    };
 
-    // Original edges
+    // 2. The Mesh Edges (Fully Connected EXCEPT A-E)
+    // 9 Edges Total
     const edges = [
-        { from: 'A', to: 'B', weight: 1, x1: 150, y1: 100, x2: 350, y2: 100, broken: true },
-        { from: 'A', to: 'C', weight: 7, x1: 150, y1: 100, x2: 150, y2: 250, modified: 3 },
-        { from: 'B', to: 'C', weight: 5, x1: 350, y1: 100, x2: 150, y2: 250 },
-        { from: 'B', to: 'D', weight: 4, x1: 350, y1: 100, x2: 350, y2: 250 },
-        { from: 'B', to: 'E', weight: 3, x1: 350, y1: 100, x2: 250, y2: 350 },
-        { from: 'D', to: 'E', weight: 6, x1: 350, y1: 250, x2: 250, y2: 350 },
-        { from: 'C', to: 'E', weight: 2, x1: 150, y1: 250, x2: 250, y2: 350 },
+        { from: 'A', to: 'B', weight: 4 },
+        { from: 'A', to: 'C', weight: 2 },
+        { from: 'A', to: 'D', weight: 7 },
+        { from: 'B', to: 'C', weight: 1 },
+        { from: 'B', to: 'D', weight: 5 },
+        { from: 'B', to: 'E', weight: 3 },
+        { from: 'C', to: 'D', weight: 8 },
+        { from: 'C', to: 'E', weight: 6 },
+        { from: 'D', to: 'E', weight: 9 }
     ];
 
-    return (
-        <div className="min-h-full">
-            <motion.h2
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-5xl font-bold text-gate mb-8 text-center tracking-wider"
-                style={{ fontFamily: 'VT323, monospace' }}
-            >
-                THE HIVE WEB
-            </motion.h2>
+    // --- PLAYER A VIEW: VISUAL MAP (NO WEIGHTS) ---
+    if (role === 'A') {
+        return (
+            <div className="w-full max-w-2xl aspect-square bg-black border-2 border-green-800 relative shadow-[0_0_20px_rgba(0,255,0,0.1)]">
+                {/* SVG LAYER FOR LINES */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                    {edges.map((edge, i) => {
+                        const n1 = nodes[edge.from];
+                        const n2 = nodes[edge.to];
+                        return (
+                            <line
+                                key={i}
+                                x1={`${n1.x}%`} y1={`${n1.y}%`}
+                                x2={`${n2.x}%`} y2={`${n2.y}%`}
+                                stroke="#22c55e"
+                                strokeWidth="2"
+                                className="opacity-80"
+                            />
+                        );
+                    })}
+                </svg>
 
-            {playerRole === 'A' ? (
-                // Player A: The Eyes - Sees the Graph Visualization
-                <div className="space-y-8">
-                    <div className="text-[#00ffaa] text-2xl font-mono text-center mb-6">
-                        🕸️ NEURAL CONNECTION MAP
+                {/* NODES LAYER */}
+                {Object.entries(nodes).map(([id, pos]) => (
+                    <div
+                        key={id}
+                        className="absolute w-12 h-12 bg-black border-2 border-green-500 rounded-full flex items-center justify-center text-green-400 font-bold text-xl z-10 shadow-[0_0_10px_rgba(0,255,0,0.5)] cursor-default transition-transform hover:scale-110"
+                        style={{
+                            left: `${pos.x}%`,
+                            top: `${pos.y}%`,
+                            transform: 'translate(-50%, -50%)'
+                        }}
+                    >
+                        {id}
                     </div>
+                ))}
 
-                    {/* Graph Visualization */}
-                    <div className="bg-black/60 border-4 border-green-500 p-8 rounded-lg max-w-4xl mx-auto">
-                        <svg viewBox="0 0 500 450" className="w-full h-full">
-                            {/* Draw edges first */}
-                            {edges.map((edge, index) => (
-                                <g key={`edge-${index}`}>
-                                    <motion.line
-                                        x1={edge.x1}
-                                        y1={edge.y1}
-                                        x2={edge.x2}
-                                        y2={edge.y2}
-                                        stroke={edge.broken ? '#ff0000' : edge.modified ? '#ffaa00' : '#00ff00'}
-                                        strokeWidth={edge.broken ? '4' : '3'}
-                                        strokeDasharray={edge.broken ? '10,5' : '0'}
-                                        initial={{ pathLength: 0 }}
-                                        animate={{ pathLength: 1 }}
-                                        transition={{ duration: 1, delay: index * 0.1 }}
-                                    />
-
-                                    {/* Weight label */}
-                                    <motion.text
-                                        x={(edge.x1 + edge.x2) / 2}
-                                        y={(edge.y1 + edge.y2) / 2 - 10}
-                                        fill={edge.broken ? '#ff0000' : edge.modified ? '#ffaa00' : '#00ff00'}
-                                        fontSize="24"
-                                        fontFamily="VT323, monospace"
-                                        fontWeight="bold"
-                                        textAnchor="middle"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: index * 0.1 + 0.5 }}
-                                    >
-                                        {edge.broken ? '∞' : edge.modified || edge.weight}
-                                    </motion.text>
-
-                                    {/* Status indicator */}
-                                    {(edge.broken || edge.modified) && (
-                                        <motion.text
-                                            x={(edge.x1 + edge.x2) / 2}
-                                            y={(edge.y1 + edge.y2) / 2 + 20}
-                                            fill={edge.broken ? '#ff0000' : '#ffaa00'}
-                                            fontSize="14"
-                                            fontFamily="monospace"
-                                            textAnchor="middle"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: [0, 1, 0] }}
-                                            transition={{ duration: 2, repeat: Infinity }}
-                                        >
-                                            {edge.broken ? 'BROKEN' : 'MODIFIED'}
-                                        </motion.text>
-                                    )}
-                                </g>
-                            ))}
-
-                            {/* Draw nodes */}
-                            {nodes.map((node, index) => (
-                                <g key={`node-${node.id}`}>
-                                    <motion.circle
-                                        cx={node.x}
-                                        cy={node.y}
-                                        r="35"
-                                        fill="#6A0DAD"
-                                        stroke="#00ffaa"
-                                        strokeWidth="4"
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        transition={{ delay: index * 0.15, type: 'spring' }}
-                                    />
-                                    <text
-                                        x={node.x}
-                                        y={node.y + 7}
-                                        fill="#ffffff"
-                                        fontSize="30"
-                                        fontWeight="bold"
-                                        textAnchor="middle"
-                                        fontFamily="VT323, monospace"
-                                    >
-                                        {node.id}
-                                    </text>
-                                </g>
-                            ))}
-                        </svg>
-                    </div>
-
-                    {/* Legend */}
-                    <div className="grid grid-cols-3 gap-4 max-w-4xl mx-auto font-mono text-sm">
-                        <div className="bg-green-500/20 border-2 border-green-500 p-3 rounded text-center">
-                            <div className="text-green-500 font-bold mb-1">NORMAL</div>
-                            <div className="text-gray-400">Original weight</div>
-                        </div>
-                        <div className="bg-yellow-500/20 border-2 border-yellow-500 p-3 rounded text-center">
-                            <div className="text-yellow-500 font-bold mb-1">MODIFIED</div>
-                            <div className="text-gray-400">Weight changed</div>
-                        </div>
-                        <div className="bg-red-500/20 border-2 border-red-500 p-3 rounded text-center">
-                            <div className="text-red-500 font-bold mb-1">BROKEN</div>
-                            <div className="text-gray-400">Infinite weight</div>
-                        </div>
-                    </div>
-
-                    <div className="text-center text-gray-400 font-mono">
-                        ⚠️ DESCRIBE THE GRAPH STRUCTURE TO YOUR PARTNER
+                <div className="absolute bottom-4 w-full text-center">
+                    <div className="bg-red-900/30 text-red-500 inline-block px-4 py-1 border border-red-800 text-xs tracking-wider animate-pulse">
+                        DATA CORRUPTION: WEIGHTS HIDDEN
                     </div>
                 </div>
-            ) : (
-                // Player B: The Brain - Gets Intel Report + MST Question
-                <div className="space-y-8 max-w-3xl mx-auto">
-                    <div className="text-[#ff0055] text-2xl font-mono text-center mb-6">
-                        🧠 NETWORK ANALYSIS
-                    </div>
+            </div>
+        );
+    }
 
-                    {/* Intel Report */}
-                    <div className="bg-black/60 border-4 border-red-500 p-6 rounded-lg">
-                        <div className="text-2xl text-red-500 font-bold mb-4 text-center font-mono">
-                            🩸 INTEL UPDATE
-                        </div>
-                        <div className="space-y-4">
-                            <div className="bg-red-600/20 border-2 border-red-600 p-4 rounded">
-                                <div className="text-red-500 font-mono text-lg font-bold">
-                                    ⚠️ CONNECTION A-B IS BROKEN
-                                </div>
-                                <div className="text-gray-400 text-sm mt-2">
-                                    Weight: 1 → ∞ (Unusable)
-                                </div>
-                            </div>
-                            <div className="bg-yellow-500/20 border-2 border-yellow-500 p-4 rounded">
-                                <div className="text-yellow-500 font-mono text-lg font-bold">
-                                    🔧 CONNECTION A-C REINFORCED
-                                </div>
-                                <div className="text-gray-400 text-sm mt-2">
-                                    Weight: 7 → 3 (Reduced)
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    // --- PLAYER B VIEW: COMMANDER INTERFACE (INTEL) ---
+    if (role === 'B') {
+        return (
+            <div className="w-full max-w-5xl h-[500px] flex flex-col bg-black border-2 border-green-800 shadow-[0_0_50px_rgba(0,255,0,0.1)] relative overflow-hidden font-mono">
+                {/* HEADER */}
+                <div className="flex-none p-4 border-b-2 border-green-900 bg-green-900/10 flex justify-between items-center">
+                    <h3 className="text-2xl text-green-400 font-bold tracking-[0.2em] animate-pulse">
+                        MASTER ARCHITECTURE RECORD
+                    </h3>
+                    <div className="text-xs text-green-600">SECURE CHANNEL // ENCRYPTED</div>
+                </div>
 
-                    {/* Original Edges Table */}
-                    <div className="bg-black/60 border-4 border-[#00ffaa] p-6 rounded-lg">
-                        <div className="text-xl text-[#00ffaa] font-bold mb-4 font-mono">
-                            📊 ORIGINAL CONNECTION WEIGHTS
+                {/* MAIN CONTENT GRID */}
+                <div className="flex-grow grid grid-cols-2 gap-0 overflow-hidden">
+
+                    {/* LEFT PANEL: BASE WEIGHTS (COMPACT GRID) */}
+                    <div className="border-r-2 border-green-900 p-4 overflow-y-auto custom-scrollbar bg-black">
+                        <div className="text-green-500 text-sm font-bold mb-3 border-b border-green-800 pb-1">
+                            EDGE WEIGHT DATABASE
                         </div>
-                        <div className="grid grid-cols-2 gap-2 font-mono text-sm">
-                            <div className="bg-black p-2 rounded">A-B: <span className="text-red-500 line-through">1</span> → <span className="text-red-600">∞</span></div>
-                            <div className="bg-black p-2 rounded">A-C: <span className="text-yellow-500 line-through">7</span> → <span className="text-green-500">3</span></div>
-                            <div className="bg-black p-2 rounded">B-C: <span className="text-green-500">5</span></div>
-                            <div className="bg-black p-2 rounded">B-D: <span className="text-green-500">4</span></div>
-                            <div className="bg-black p-2 rounded">B-E: <span className="text-green-500">3</span></div>
-                            <div className="bg-black p-2 rounded">D-E: <span className="text-green-500">6</span></div>
-                            <div className="bg-black p-2 rounded">C-E: <span className="text-green-500">2</span></div>
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                            {edges.map((e, i) => (
+                                <div key={i} className="flex justify-between items-center text-sm py-1 border-b border-gray-900 hover:bg-green-900/20 px-2 transition-colors">
+                                    <span className="text-gray-400">{e.from}-{e.to}</span>
+                                    <span className="text-green-400 font-bold">{e.weight}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* MST Algorithm */}
-                    <div className="bg-black/60 border-4 border-[#ff0055] p-8 rounded-lg">
-                        <div className="text-2xl text-[#ff0055] font-bold mb-4 text-center font-mono">
-                            MINIMUM SPANNING TREE
+                    {/* RIGHT PANEL: INTEL FEED */}
+                    <div className="p-4 bg-gray-900/10 flex flex-col relative">
+                        <div className="text-red-500 text-sm font-bold mb-3 border-b border-red-900/30 pb-1">
+                            LIVE INTELLIGENCE
                         </div>
-                        <div className="text-white font-mono space-y-3 text-sm">
-                            <div className="bg-[#ff0055]/10 p-3 rounded">
-                                <strong>GOAL:</strong> Connect all 5 nodes with minimum total weight
-                            </div>
-                            <div className="bg-[#ff0055]/10 p-3 rounded">
-                                <strong>RULES:</strong> No cycles, must use exactly 4 edges
-                            </div>
-                            <div className="bg-[#ff0055]/10 p-3 rounded">
-                                <strong>ALGORITHM:</strong> Kruskal's or Prim's
-                                <div className="text-xs text-gray-400 mt-1">
-                                    Sort edges by weight, pick smallest without cycles
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Question */}
-                    <div className="bg-black/60 border-4 border-green-500 p-8 rounded-lg">
-                        <div className="text-2xl text-green-500 font-bold mb-6 text-center font-mono">
-                            📝 THE QUESTION
-                        </div>
-                        <div className="text-white font-mono text-xl text-center space-y-4">
-                            <div>After applying the intel updates:</div>
-                            <div className="text-[#00ffaa] text-3xl font-bold">
-                                CALCULATE TOTAL WEIGHT OF THE<br />
-                                NEW MINIMUM SPANNING TREE
+                        <div className="space-y-3 flex-grow">
+                            <div className="p-3 bg-red-950/40 border border-red-600/50 text-red-200 text-sm animate-pulse">
+                                <strong>⚠️ CRITICAL ALERT:</strong><br />
+                                Connection <span className="text-white font-bold">A-B</span> Severed (∞)
+                            </div>
+                            <div className="p-3 bg-blue-950/40 border border-blue-600/50 text-blue-200 text-sm">
+                                <strong>ℹ️ SYSTEM UPDATE:</strong><br />
+                                Connection <span className="text-white font-bold">A-C</span> Reinforced (Weight = 1)
                             </div>
                         </div>
-                    </div>
 
-                    <div className="text-center text-gray-400 font-mono text-lg mt-6">
-                        📝 SUBMIT FORMAT: Integer
+                        <div className="absolute top-2 right-2 opacity-10 text-6xl rotate-12 pointer-events-none">
+                            📡
+                        </div>
                     </div>
                 </div>
-            )}
-        </div>
-    );
-}
+
+                {/* FOOTER: MISSION OBJECTIVE */}
+                <div className="flex-none bg-green-900 text-black p-3 text-center font-bold tracking-wider border-t-2 border-green-500">
+                    MISSION: CALCULATE MINIMUM SPANNING TREE (MST) FROM THE GIVEN WEIGHTS
+                </div>
+            </div>
+        );
+    }
+
+    return <div>Searching for Signal...</div>;
+};
 
 export default Phase4;

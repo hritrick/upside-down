@@ -1,359 +1,319 @@
+// server.js - FINAL STABLE VERSION
 import express from 'express';
-import { createServer } from 'http';
+import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import connectDB from './config/db.js';
 import Team from './models/Team.js';
-import { validateAnswer } from './utils/phaseValidation.js';
 
-// Import routes (for future REST endpoints if needed)
-import sessionsRouter from './routes/sessions.js';
-import leaderboardRouter from './routes/leaderboard.js';
-import gamedataRouter from './routes/gamedata.js';
-
-// Load environment variables
 dotenv.config();
 
-// Initialize Express app
+// 1. App & Server Setup
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
+const server = http.createServer(app);
+
+// 2. CORS & Middleware
+app.use(cors({
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    methods: ["GET", "POST"],
+    credentials: true
+}));
+app.use(express.json());
+
+// 3. Database Connection
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI)
+    .then(() => console.log('✅ MongoDB Connected'))
+    .catch((err) => console.error('❌ MongoDB Error:', err));
+
+// 4. Socket.io Setup
+const io = new Server(server, {
     cors: {
-        origin: [
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'https://panic-grocery-run.vercel.app',
-            'https://the-algorithm-hunt.netlify.app',
-            process.env.FRONTEND_URL
-        ].filter(Boolean),
-        methods: ['GET', 'POST'],
+        origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+        methods: ["GET", "POST"],
         credentials: true
     }
 });
 
+// 5. Game Logic & Validation Answers
+const ANSWERS = {
+    // Phase 1 accepts dynamic answers in the handler below
+    phase2: "1",
+    phase3: "9",
+    phase4: "12"
+};
 
-const PORT = process.env.PORT || 5000;
+// 6. Hint Data Dictionary
+// 6. Hint Data Dictionary (Actionable Solutions)
+const HINT_DATA = {
+    1: [
+        "CHEAT: DECIMAL VALUES: 0x09=9, 0x17=23, 0x3F=63, 0x8B=139, 0xA1=161, 0xE4=228", // Full Decimal List
+        "CHEAT: BINARY WEIGHTS: 0x3F(6), 0x8B(4), 0x17(4), 0xE4(3), 0xA1(3), 0x09(2)" // Secondary Help
+    ],
+    2: [
+        "CHEAT: Index 2 is blocked. The first collision (Key 42) must move to (2 + 1²) = Index 3.",
+        "CHEAT: Key 32 maps to 2. Index 2 is blocked. Attempt 1 (Index 3) might be taken by 42. Try Attempt 2: (2 + 2²) = Index 6."
+    ],
+    3: [
+        "CHEAT: The Root is 8. The LEFT subtree contains {2, 5, 6}. The RIGHT subtree contains {9, 10, 11}.",
+        "CHEAT: Node 10 is in the Right Cluster. Look at the Inorder: 9 is to the left of 10. 9 is the child."
+    ],
+    4: [
+        "CHEAT: Edge A-B is broken. Best starting edge is C-E (Weight 2).",
+        "CHEAT: Avoid cycle A-C-E. Connect B-E (Weight 3) next."
+    ]
+};
 
-// Connect to MongoDB
-connectDB();
 
-// Middleware
-app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://panic-grocery-run.vercel.app',
-        'https://the-algorithm-hunt.netlify.app',
-        process.env.FRONTEND_URL
-    ].filter(Boolean),
-    credentials: true
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Request logging middleware
-app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path}`);
-    next();
-});
-
-// Routes
-app.use('/api/sessions', sessionsRouter);
-app.use('/api/leaderboard', leaderboardRouter);
-app.use('/api/gamedata', gamedataRouter);
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-});
-
-// Root endpoint
-app.get('/', (req, res) => {
-    res.json({
-        message: '🎮 The Upside Down Protocol API',
-        version: '2.0.0',
-        endpoints: {
-            health: '/api/health',
-            socketio: '/socket.io'
-        }
-    });
-});
-
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('❌ Error:', err.stack);
-    res.status(500).json({
-        error: 'Internal server error',
-        message: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-});
-
-// ============================================
-// SOCKET.IO REAL-TIME EVENT HANDLERS
-// ============================================
-
-// Store active timers for each team
-const teamTimers = new Map();
-const glitchTimers = new Map();
-
+// 6. Socket Events
 io.on('connection', (socket) => {
-    console.log(`🔌 Player connected: ${socket.id}`);
+    console.log(`🔌 Connected: ${socket.id}`);
 
-    // ========== CREATE TEAM ==========
-    socket.on('create_team', async (callback) => {
+    // Create Team
+    socket.on('create_team', async (playerName) => {
+        console.log(`📨 RECEIVED 'create_team' from ${socket.id}`); // Debug Log 4
+        console.log(`📋 Player Name: ${playerName}`);
+
         try {
-            console.log('📝 CREATE TEAM request from:', socket.id);
-            const teamCode = await Team.generateTeamCode();
-            console.log('🎲 Generated team code:', teamCode);
+            const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+            console.log(`🎲 Generated roomCode: ${roomCode}`);
 
-            const team = new Team({
-                teamName: teamCode,
-                playerA_socketId: socket.id,
-                status: 'waiting'
+            const newTeam = new Team({
+                roomCode,
+                teamName: `Team-${roomCode}`,
+                playerA: { socketId: socket.id, name: playerName },
+                status: 'waiting',
+                lockdownUntil: 0
             });
-            await team.save();
-            console.log('✅ Team saved:', teamCode);
 
-            socket.join(teamCode);
-            console.log(`🎮 Team created: ${teamCode} by ${socket.id}`);
+            await newTeam.save();
+            console.log(`💾 Team saved to database`);
 
-            callback({
-                success: true,
-                teamCode,
-                playerRole: 'A'
-            });
-        } catch (error) {
-            console.error('❌ Error creating team:', error);
-            callback({ success: false, error: error.message || 'Failed to create team' });
+            socket.roomCode = roomCode; // Store for disconnect handling
+            socket.join(roomCode);
+            console.log(`🚪 Socket joined room: ${roomCode}`);
+
+            socket.emit('team_created', { roomCode, role: 'A' });
+            console.log(`📤 SENT 'team_created' back to client`); // Debug Log 5
+            console.log(`✨ Team ${roomCode} created by ${playerName}`);
+        } catch (err) {
+            console.error("💥 ERROR inside create_team:", err);
+            socket.emit('error', 'Creation failed');
         }
     });
 
-    // ========== JOIN TEAM ==========
-    socket.on('join_team', async ({ teamCode }, callback) => {
+
+    // Join Team
+    socket.on('join_team', async ({ roomCode, playerName }) => {
+        console.log(`📥 ATTEMPT JOIN: Room="${roomCode}" (Type: ${typeof roomCode}), Player="${playerName}"`);
+
         try {
-            const team = await Team.findOne({ teamName: teamCode });
+            // FORCE STRING COMPARISON just in case
+            const targetCode = String(roomCode).trim();
 
+            const team = await Team.findOne({ roomCode: targetCode });
+
+            // LOG WHAT WE FOUND
             if (!team) {
-                return callback({ success: false, error: 'Team not found' });
+                console.log(`❌ FAIL: Team with code ${targetCode} NOT FOUND in DB.`);
+                return socket.emit('error', 'Team not found');
             }
 
-            if (team.playerB_socketId) {
-                return callback({ success: false, error: 'Team is full' });
+            console.log(`🔍 FOUND TEAM: ${team.teamName}`);
+            console.log(`   Player A: ${team.playerA?.name} (${team.playerA?.socketId})`);
+            console.log(`   Player B: ${team.playerB?.name} (${team.playerB?.socketId})`);
+
+            // CHECK IF FULL
+            if (team.playerB && team.playerB.socketId) {
+                console.log(`❌ FAIL: Team is already full.`);
+                return socket.emit('error', 'Room full');
             }
 
-            team.playerB_socketId = socket.id;
+            // SUCCESS LOGIC
+            team.playerB = { socketId: socket.id, name: playerName || 'Player B' };
             team.status = 'playing';
-            team.startTime = new Date();
+            team.startTime = Date.now(); // START TIMER
             await team.save();
 
-            socket.join(teamCode);
-            console.log(`🎮 Player B joined team: ${teamCode}`);
+            socket.roomCode = targetCode; // Store for disconnect handling
 
-            // Notify both players
-            io.to(teamCode).emit('both_players_connected', {
-                currentPhase: team.currentPhase,
-                timerSeconds: team.timerSeconds
-            });
+            socket.join(targetCode);
+            io.to(targetCode).emit('game_start', { team });
+            console.log(`✅ SUCCESS: ${playerName} joined Room ${targetCode}`);
 
-            // Start the timer
-            startTeamTimer(teamCode);
-
-            // Start the glitch interference timer  
-            startGlitchTimer(teamCode);
-
-            callback({
-                success: true,
-                teamCode,
-                playerRole: 'B'
-            });
-        } catch (error) {
-            console.error('Error joining team:', error);
-            callback({ success: false, error: 'Failed to join team' });
-        }
-    });
-
-    // ========== SUBMIT ANSWER (WITH LOCKDOWN PENALTY) ==========
-    socket.on('submit_answer', async ({ teamCode, answer }, callback) => {
-        try {
-            const team = await Team.findOne({ teamName: teamCode });
-
-            if (!team) {
-                return callback({ success: false, error: 'Team not found' });
-            }
-
-            // Check if team is in lockdown
-            const now = Date.now();
-            if (now < team.lockdownUntil) {
-                const remainingSeconds = Math.ceil((team.lockdownUntil - now) / 1000);
-                console.log(`🔒 Team ${teamCode} is locked for ${remainingSeconds}s`);
-
-                io.to(teamCode).emit('error_locked', {
-                    remainingSeconds,
-                    message: 'System is locked due to incorrect answer'
-                });
-
-                return callback({ success: false, error: 'System locked', locked: true, remainingSeconds });
-            }
-
-            const isCorrect = validateAnswer(team.currentPhase, answer);
-
-            if (isCorrect) {
-                // Correct answer - clear any lockdown
-                team.lockdownUntil = 0;
-                team.phaseAnswers.push(answer);
-                team.advancePhase();
-                await team.save();
-
-                console.log(`✅ Team ${teamCode} advanced to phase ${team.currentPhase}`);
-
-                // Notify both players of success
-                io.to(teamCode).emit('answer_correct', {
-                    success: true,
-                    currentPhase: team.currentPhase,
-                    status: team.status
-                });
-
-                // If game completed, stop timers
-                if (team.status === 'completed') {
-                    stopTeamTimer(teamCode);
-                    stopGlitchTimer(teamCode);
+            // START SERVER SIDE TIMER (12 Minutes)
+            setTimeout(async () => {
+                const checkTeam = await Team.findOne({ roomCode: targetCode });
+                if (checkTeam && checkTeam.status === 'playing') {
+                    console.log(`⏰ TIME UP for Room ${targetCode}`);
+                    checkTeam.status = 'lose';
+                    await checkTeam.save();
+                    io.to(targetCode).emit('game_over', {
+                        result: 'LOSE',
+                        totalHints: checkTeam.totalHintsUsed
+                    });
                 }
+            }, 12 * 60 * 1000);
 
-                callback({ success: true, correct: true });
-            } else {
-                // Wrong answer - activate 30s lockdown
-                team.lockdownUntil = Date.now() + 30000; // 30 seconds
-                await team.save();
-
-                console.log(`❌ Team ${teamCode} wrong answer - locked for 30s`);
-
-                // Notify both players of failure and lockdown
-                io.to(teamCode).emit('answer_incorrect', {
-                    success: false,
-                    currentPhase: team.currentPhase,
-                    locked: true,
-                    lockdownSeconds: 30
-                });
-
-                callback({ success: true, correct: false, locked: true });
-            }
-        } catch (error) {
-            console.error('Error submitting answer:', error);
-            callback({ success: false, error: 'Failed to submit answer' });
+        } catch (err) {
+            console.error("💥 DB ERROR inside join_team:", err);
+            socket.emit('error', 'Join failed due to server error');
         }
     });
 
-    // ========== DISCONNECT ==========
-    socket.on('disconnect', async () => {
-        console.log(`🔌 Player disconnected: ${socket.id}`);
 
+    // Submit Answer (With 30s Penalty)
+    socket.on('submit_answer', async ({ roomCode, answer, phase }) => {
         try {
-            // Find team with this socket
-            const team = await Team.findOne({
-                $or: [
-                    { playerA_socketId: socket.id },
-                    { playerB_socketId: socket.id }
-                ]
-            });
+            const team = await Team.findOne({ roomCode });
+            if (!team) return;
 
-            if (team) {
-                // Notify partner
-                io.to(team.teamName).emit('partner_disconnected');
-
-                // Stop timer
-                stopTeamTimer(team.teamName);
-
-                // Optionally update team status
-                team.status = 'failed';
-                await team.save();
+            // Check Lockdown
+            if (Date.now() < team.lockdownUntil) {
+                return socket.emit('error_locked', { timeLeft: Math.ceil((team.lockdownUntil - Date.now()) / 1000) });
             }
-        } catch (error) {
-            console.error('Error handling disconnect:', error);
+
+            // Check Game Over Timeout (12 Minutes)
+            if (team.startTime && (Date.now() - team.startTime > 12 * 60 * 1000)) {
+                return socket.emit('game_over', { result: 'LOSE', totalHints: team.totalHintsUsed }); // Timeout Loss
+            }
+
+            // Normalize answer (remove commas, extra spaces, ensure uppercase)
+            const cleanAnswer = answer.replace(/,/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+
+            // Validate based on Phase
+            let correct = false;
+
+            if (phase === 1) {
+                // Phase 1: Hex Sorting (Accepts both Hamming Descending AND Numeric Ascending)
+                // Codes: 0x3F(63, w6), 0xA1(161, w3), 0x09(9, w2), 0xE4(228, w3), 0x8B(139, w4), 0x17(23, w4)
+
+                // Option A: Rule 1 - Hamming Weight Descending
+                // Weights: 6 -> 4,4 -> 3,3 -> 2
+                // Permutations due to ties (8B/17 for w4, E4/A1 for w3)
+                const h1 = "0X3F 0X8B 0X17 0XE4 0XA1 0X09";
+                const h2 = "0X3F 0X8B 0X17 0XA1 0XE4 0X09";
+                const h3 = "0X3F 0X17 0X8B 0XE4 0XA1 0X09";
+                const h4 = "0X3F 0X17 0X8B 0XA1 0XE4 0X09";
+
+                // Option B: Rule 2 - Numeric Ascending (9 -> 23 -> 63 -> 139 -> 161 -> 228)
+                const numeric = "0X09 0X17 0X3F 0X8B 0XA1 0XE4";
+
+                correct = [h1, h2, h3, h4, numeric].includes(cleanAnswer);
+            } else {
+                // Phases 2, 3, 4: Simple String Match
+                correct = ANSWERS[`phase${phase}`] === cleanAnswer.replace(/^0+/, ''); // basic trimming
+            }
+
+            if (correct) {
+                if (team.currentPhase === 4) {
+                    // VICTORY CONDITION
+                    team.status = 'win';
+                    await team.save();
+                    const duration = Math.floor((Date.now() - team.startTime) / 1000); // Seconds
+                    io.to(roomCode).emit('game_over', {
+                        result: 'WIN',
+                        totalHints: team.totalHintsUsed,
+                        duration
+                    });
+                } else {
+                    team.currentPhase += 1;
+                    await team.save();
+                    io.to(roomCode).emit('answer_correct', { nextPhase: team.currentPhase });
+                }
+            } else {
+                team.lockdownUntil = Date.now() + 30000; // 30s penalty
+                await team.save();
+                io.to(roomCode).emit('answer_incorrect');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    // Request Hint (Neural Budget System)
+    // Request Hint (Strict 1 Per Phase, No Cost)
+    socket.on('request_hint', async ({ roomCode, currentPhase }) => {
+        try {
+            const team = await Team.findOne({ roomCode });
+            if (!team) return;
+
+            if (!team.phaseHintCounts) team.phaseHintCounts = new Map();
+
+            // STRICT LIMIT: 1 Hint Per Phase
+            const phaseStr = String(currentPhase);
+            const usedInPhase = team.phaseHintCounts.get(phaseStr) || 0;
+
+            if (usedInPhase >= 1) {
+                return socket.emit('error', 'HINT ALREADY USED FOR THIS PHASE');
+            }
+
+            // Update Stats
+            team.totalHintsUsed = (team.totalHintsUsed || 0) + 1; // Ensure totalHintsUsed is initialized
+            team.phaseHintCounts.set(phaseStr, usedInPhase + 1);
+            await team.save();
+
+            // Get Hint Text
+            const hintsForPhase = HINT_DATA[currentPhase] || ["No Data"];
+            // Always give the first hint since there's only 1 allowed now
+            const hintText = hintsForPhase[0];
+
+            io.to(roomCode).emit('hint_received', {
+                hintText,
+                hintsExhausted: true // Disable button immediately
+            });
+            console.log(`💡 Hint served to ${roomCode} (Phase ${currentPhase})`);
+
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    // Request Game State (Sync)
+    // Request Game State (Sync)
+    socket.on('request_game_state', async (roomCode) => {
+        try {
+            const team = await Team.findOne({ roomCode });
+            if (team) {
+                socket.join(roomCode); // Ensure socket is re-joined
+
+                // Check if hints are exhausted for current phase (Limit: 1)
+                const phaseStr = String(team.currentPhase);
+                const used = team.phaseHintCounts ? (team.phaseHintCounts.get(phaseStr) || 0) : 0;
+
+                socket.emit('game_state_update', {
+                    ...team.toObject(),
+                    hintsExhausted: used >= 1
+                });
+                console.log(`🔄 State synced for Room ${roomCode}`);
+            }
+        } catch (err) {
+            console.error("Sync error:", err);
+        }
+    });
+
+    socket.on('disconnect', async () => {
+        console.log(`❌ Disconnected: ${socket.id}`);
+        if (socket.roomCode) {
+            console.log(`⚠️ Player disconnected from Room ${socket.roomCode}`);
+            // Notify the room
+            io.to(socket.roomCode).emit('opponent_left');
+
+            // Mark as aborted in DB (Optional best practice)
+            try {
+                await Team.findOneAndUpdate(
+                    { roomCode: socket.roomCode },
+                    { status: 'aborted' }
+                );
+            } catch (err) {
+                console.error("Error updating team status on disconnect:", err);
+            }
         }
     });
 });
 
-// ========== TIMER MANAGEMENT ==========
-function startTeamTimer(teamCode) {
-    if (teamTimers.has(teamCode)) {
-        clearInterval(teamTimers.get(teamCode));
-    }
-
-    const interval = setInterval(async () => {
-        const team = await Team.findOne({ teamName: teamCode });
-        if (!team) {
-            clearInterval(interval);
-            teamTimers.delete(teamCode);
-            return;
-        }
-
-        team.timerSeconds -= 1;
-
-        if (team.timerSeconds <= 0) {
-            team.status = 'failed';
-            team.endTime = new Date();
-            await team.save();
-
-            io.to(teamCode).emit('time_up');
-            clearInterval(interval);
-            teamTimers.delete(teamCode);
-            stopGlitchTimer(teamCode);
-        } else {
-            await team.save();
-            io.to(teamCode).emit('timer_update', { timerSeconds: team.timerSeconds });
-        }
-    }, 1000);
-
-    teamTimers.set(teamCode, interval);
-}
-
-// ========== HELPER: START GLITCH TIMER (Mind Flayer's Interference) ==========
-function startGlitchTimer(teamCode) {
-    if (glitchTimers.has(teamCode)) {
-        clearInterval(glitchTimers.get(teamCode));
-    }
-
-    const glitchInterval = setInterval(() => {
-        console.log(`⚡ Glitch event triggered for team: ${teamCode}`);
-        io.to(teamCode).emit('glitch_event', { duration: 5000 });
-    }, 45000); // Every 45 seconds
-
-    glitchTimers.set(teamCode, glitchInterval);
-}
-
-// ========== HELPER: STOP GLITCH TIMER ==========
-function stopGlitchTimer(teamCode) {
-    if (glitchTimers.has(teamCode)) {
-        clearInterval(glitchTimers.get(teamCode));
-        glitchTimers.delete(teamCode);
-        console.log(`⚡ Glitch timer stopped for team: ${teamCode}`);
-    }
-}
-
-function stopTeamTimer(teamCode) {
-    const interval = teamTimers.get(teamCode);
-    if (interval) {
-        clearInterval(interval);
-        teamTimers.delete(teamCode);
-        console.log(`⏱️  Timer stopped for team: ${teamCode}`);
-    }
-}
-
-// Start server
-httpServer.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🌐 API: http://localhost:${PORT}`);
-    console.log(`🔌 Socket.io ready for connections`);
-    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+// 7. Start Server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`SERVER RUNNING ON PORT ${PORT}`);
 });
-

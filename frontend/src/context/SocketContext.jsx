@@ -4,11 +4,9 @@ import { io } from 'socket.io-client';
 const SocketContext = createContext(null);
 
 // Initialize Socket.io client
-const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000', {
-    autoConnect: true,
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: 5
+const socket = io('http://localhost:5001', {
+    withCredentials: true,
+    transports: ['websocket', 'polling']
 });
 
 export const SocketProvider = ({ children }) => {

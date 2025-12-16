@@ -16,6 +16,45 @@ function Lobby() {
     const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
+        if (!socket) return;
+
+        // Listen for team created response
+        socket.on('team_created', (data) => {
+            console.log("✅ SERVER RESPONDED: Team Created!", data); // Debug Log 3
+            setTeamInfo(data.roomCode, data.role);
+            setCreatedTeamCode(data.roomCode);
+            setError('');
+        });
+
+        // Listen for game start (when joining a team)
+        socket.on('game_start', (data) => {
+            console.log("🚀 GAME START EVENT RECEIVED:", data);
+
+            // 1. SAFEGUARD: Extract roomCode correctly
+            const roomCode = data.team?.roomCode || data.roomCode;
+
+            if (roomCode) {
+                console.log(`✅ Navigating to /game/${roomCode}`);
+                setSyncing(true);
+                setShowJoinModal(false);
+                setError('');
+
+                // Navigate to game specific room
+                setTimeout(() => {
+                    navigate(`/game/${roomCode}`);
+                }, 2000);
+            } else {
+                console.error("❌ ERROR: Missing roomCode in game_start payload", data);
+                setError("Failed to join: Missing room code");
+            }
+        });
+
+        // Listen for errors
+        socket.on('error', (err) => {
+            console.error("❌ SERVER ERROR:", err);
+            setError(err);
+        });
+
         // Listen for both players connected
         socket.on('both_players_connected', ({ currentPhase, timerSeconds }) => {
             setSyncing(true);
@@ -29,20 +68,24 @@ function Lobby() {
         });
 
         return () => {
+            socket.off('team_created');
+            socket.off('game_start');
+            socket.off('error');
             socket.off('both_players_connected');
         };
     }, [socket, navigate, setBothPlayersConnected, setGameState]);
 
     const handleCreateTeam = () => {
-        socket.emit('create_team', (response) => {
-            if (response.success) {
-                setTeamInfo(response.teamCode, response.playerRole);
-                setCreatedTeamCode(response.teamCode);
-                setError('');
-            } else {
-                setError(response.error || 'Failed to create team');
-            }
-        });
+        console.log("🖱️ BUTTON CLICKED: Attempting to create team..."); // Debug Log 1
+
+        if (!socket) {
+            console.error("❌ Socket is undefined!");
+            return;
+        }
+
+        // Emit the event with a distinct payload
+        socket.emit('create_team', 'Player A');
+        console.log("📡 EVENT EMITTED: 'create_team'"); // Debug Log 2
     };
 
     const handleJoinTeam = () => {
@@ -51,14 +94,18 @@ function Lobby() {
             return;
         }
 
-        socket.emit('join_team', { teamCode: joinCode }, (response) => {
-            if (response.success) {
-                setTeamInfo(response.teamCode, response.playerRole);
-                setShowJoinModal(false);
-                setError('');
-            } else {
-                setError(response.error || 'Failed to join team');
-            }
+        if (!socket) {
+            console.error("❌ Socket is undefined!");
+            return;
+        }
+
+        // Debug Log
+        console.log(`📤 SENDING JOIN REQUEST: Code=[${joinCode}] Name=[Player B]`);
+
+        // Ensure roomCode is a string - match backend event format
+        socket.emit('join_team', {
+            roomCode: String(joinCode).trim(),
+            playerName: 'Player B'
         });
     };
 
