@@ -1,33 +1,37 @@
 import React from 'react';
 
 const Phase4 = ({ role }) => {
-    // 1. Fixed Node Positions (Percentage)
+    // 7-Node Graph Layout (Hexagonal arrangement with center node)
     const nodes = {
-        A: { x: 20, y: 20 },
-        B: { x: 80, y: 20 },
-        C: { x: 20, y: 80 },
-        D: { x: 80, y: 80 },
-        E: { x: 50, y: 50 } // Center
+        a: { x: 15, y: 50 },   // Left
+        b: { x: 35, y: 15 },   // Top-Left
+        c: { x: 35, y: 85 },   // Bottom-Left
+        d: { x: 50, y: 50 },   // Center
+        e: { x: 65, y: 15 },   // Top-Right
+        f: { x: 65, y: 85 },   // Bottom-Right
+        g: { x: 85, y: 50 }    // Right
     };
 
-    // 2. The Mesh Edges (Fully Connected EXCEPT A-E)
-    // 9 Edges Total
+    // 12 Weighted Edges from diagram
     const edges = [
-        { from: 'A', to: 'B', weight: 4 },
-        { from: 'A', to: 'C', weight: 2 },
-        { from: 'A', to: 'D', weight: 7 },
-        { from: 'B', to: 'C', weight: 1 },
-        { from: 'B', to: 'D', weight: 5 },
-        { from: 'B', to: 'E', weight: 3 },
-        { from: 'C', to: 'D', weight: 8 },
-        { from: 'C', to: 'E', weight: 6 },
-        { from: 'D', to: 'E', weight: 9 }
+        { from: 'a', to: 'b', weight: 5 },
+        { from: 'a', to: 'c', weight: 3 },
+        { from: 'b', to: 'c', weight: 4 },
+        { from: 'b', to: 'd', weight: 6 },
+        { from: 'b', to: 'e', weight: 2 },
+        { from: 'c', to: 'd', weight: 5 },
+        { from: 'c', to: 'f', weight: 6 },
+        { from: 'd', to: 'e', weight: 6 },
+        { from: 'd', to: 'f', weight: 6 },
+        { from: 'e', to: 'f', weight: 3 },
+        { from: 'e', to: 'g', weight: 5 },
+        { from: 'f', to: 'g', weight: 4 }
     ];
 
     // --- PLAYER A VIEW: VISUAL MAP (NO WEIGHTS) ---
     if (role === 'A') {
         return (
-            <div className="w-full max-w-2xl aspect-square bg-black border-2 border-green-800 relative shadow-[0_0_20px_rgba(0,255,0,0.1)]">
+            <div className="w-full max-w-5xl h-[600px] bg-black border-2 border-green-800 relative shadow-[0_0_20px_rgba(0,255,0,0.1)]">
                 {/* SVG LAYER FOR LINES */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     {edges.map((edge, i) => {
@@ -100,32 +104,28 @@ const Phase4 = ({ role }) => {
                         </div>
                     </div>
 
-                    {/* RIGHT PANEL: INTEL FEED */}
+                    {/* RIGHT PANEL: MISSION BRIEFING */}
                     <div className="p-4 bg-gray-900/10 flex flex-col relative">
                         <div className="text-red-500 text-sm font-bold mb-3 border-b border-red-900/30 pb-1">
-                            LIVE INTELLIGENCE
+                            MISSION BRIEFING
                         </div>
 
-                        <div className="space-y-3 flex-grow">
-                            <div className="p-3 bg-red-950/40 border border-red-600/50 text-red-200 text-sm animate-pulse">
-                                <strong>⚠️ CRITICAL ALERT:</strong><br />
-                                Connection <span className="text-white font-bold">A-B</span> Severed (∞)
+                        <div className="space-y-4 flex-grow">
+                            <div className="p-4 bg-yellow-950/40 border border-yellow-600/50 text-yellow-200">
+                                <strong>⚡ OBJECTIVE:</strong><br />
+                                <span className="text-sm">Calculate the <span className="text-white font-bold">MINIMUM SPANNING TREE (MST)</span> total weight for the network.</span>
                             </div>
-                            <div className="p-3 bg-blue-950/40 border border-blue-600/50 text-blue-200 text-sm">
-                                <strong>ℹ️ SYSTEM UPDATE:</strong><br />
-                                Connection <span className="text-white font-bold">A-C</span> Reinforced (Weight = 1)
+                            <div className="p-3 bg-gray-800 border border-gray-600 text-gray-400 text-xs">
+                                <span>ANSWER FORMAT:</span>
+                                <div className="text-green-400 font-mono mt-1">Integer</div>
                             </div>
-                        </div>
-
-                        <div className="absolute top-2 right-2 opacity-10 text-6xl rotate-12 pointer-events-none">
-                            📡
                         </div>
                     </div>
                 </div>
 
                 {/* FOOTER: MISSION OBJECTIVE */}
                 <div className="flex-none bg-green-900 text-black p-3 text-center font-bold tracking-wider border-t-2 border-green-500">
-                    MISSION: CALCULATE MINIMUM SPANNING TREE (MST) FROM THE GIVEN WEIGHTS
+                    CALCULATE TOTAL WEIGHT OF THE MINIMUM SPANNING TREE
                 </div>
             </div>
         );

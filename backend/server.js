@@ -37,35 +37,53 @@ const io = new Server(server, {
 
 // 5. Game Logic & Validation Answers
 const ANSWERS = {
-    // Phase 1 accepts dynamic answers in the handler below
+    phase1: "0x09 0x17 0x3F 0x8B 0xA1 0xE4",
     phase2: "1",
-    phase3: "9",
-    phase4: "12"
+    phase3: "20",
+    phase4: "19"
 };
 
 // 6. Hint Data Dictionary
-// 6. Hint Data Dictionary (Actionable Solutions)
 const HINT_DATA = {
     1: [
-        "CHEAT: DECIMAL VALUES: 0x09=9, 0x17=23, 0x3F=63, 0x8B=139, 0xA1=161, 0xE4=228", // Full Decimal List
-        "CHEAT: BINARY WEIGHTS: 0x3F(6), 0x8B(4), 0x17(4), 0xE4(3), 0xA1(3), 0x09(2)" // Secondary Help
+        "DECIMAL VALUES: 0x09=9, 0xE4=228, 0x17=23, 0x8B=139, 0xA1=161, 0x3F=63", // Full Decimal List
     ],
     2: [
-        "CHEAT: Index 2 is blocked. The first collision (Key 42) must move to (2 + 1²) = Index 3.",
-        "CHEAT: Key 32 maps to 2. Index 2 is blocked. Attempt 1 (Index 3) might be taken by 42. Try Attempt 2: (2 + 2²) = Index 6."
+        "Index 2 is blocked. The first collision (Key 42) must move to (2 + 1²) = Index 3."
     ],
     3: [
-        "CHEAT: The Root is 8. The LEFT subtree contains {2, 5, 6}. The RIGHT subtree contains {9, 10, 11}.",
-        "CHEAT: Node 10 is in the Right Cluster. Look at the Inorder: 9 is to the left of 10. 9 is the child."
+        "Preorder: Root->Left->Right. Inorder: Left->Root->Right. The Root Node is 50."
     ],
     4: [
-        "CHEAT: Edge A-B is broken. Best starting edge is C-E (Weight 2).",
-        "CHEAT: Avoid cycle A-C-E. Connect B-E (Weight 3) next."
+        "Total number of nodes - 1 = Number of edges required for MST."
     ]
 };
 
 
-// 6. Socket Events
+// Phase 4: Fixed Dijkstra Graph Generator
+function generatePhase4Puzzle() {
+    // FIXED GRAPH - Matches user diagram exactly
+    const nodes = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+    const edges = [
+        ['a', 'b', 5], ['a', 'c', 3],
+        ['b', 'c', 4], ['b', 'd', 6], ['b', 'e', 2],
+        ['c', 'd', 5], ['c', 'f', 6],
+        ['d', 'e', 6], ['d', 'f', 6],
+        ['e', 'f', 3], ['e', 'g', 5],
+        ['f', 'g', 4]
+    ];
+
+    // Static Mission: Solution is hardcoded to 19 (User Request)
+    return {
+        nodes,
+        edges,
+        startNode: 'MST',
+        endNode: 'MST',
+        solution: 19
+    };
+}
+
+// 7. Socket Events
 io.on('connection', (socket) => {
     console.log(`🔌 Connected: ${socket.id}`);
 
@@ -78,12 +96,15 @@ io.on('connection', (socket) => {
             const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
             console.log(`🎲 Generated roomCode: ${roomCode}`);
 
+            const phase4Puzzle = generatePhase4Puzzle(); // Generate Static Phase 4
+
             const newTeam = new Team({
                 roomCode,
                 teamName: `Team-${roomCode}`,
                 playerA: { socketId: socket.id, name: playerName },
                 status: 'waiting',
-                lockdownUntil: 0
+                lockdownUntil: 0,
+                phase4State: phase4Puzzle // Save to DB
             });
 
             await newTeam.save();
@@ -141,7 +162,7 @@ io.on('connection', (socket) => {
             io.to(targetCode).emit('game_start', { team });
             console.log(`✅ SUCCESS: ${playerName} joined Room ${targetCode}`);
 
-            // START SERVER SIDE TIMER (12 Minutes)
+            // START SERVER SIDE TIMER (20 Minutes)
             setTimeout(async () => {
                 const checkTeam = await Team.findOne({ roomCode: targetCode });
                 if (checkTeam && checkTeam.status === 'playing') {
@@ -153,7 +174,7 @@ io.on('connection', (socket) => {
                         totalHints: checkTeam.totalHintsUsed
                     });
                 }
-            }, 12 * 60 * 1000);
+            }, 20 * 60 * 1000); // 20 minutes
 
         } catch (err) {
             console.error("💥 DB ERROR inside join_team:", err);
@@ -173,37 +194,17 @@ io.on('connection', (socket) => {
                 return socket.emit('error_locked', { timeLeft: Math.ceil((team.lockdownUntil - Date.now()) / 1000) });
             }
 
-            // Check Game Over Timeout (12 Minutes)
-            if (team.startTime && (Date.now() - team.startTime > 12 * 60 * 1000)) {
+            // Check Game Over Timeout (20 Minutes)
+            if (team.startTime && (Date.now() - team.startTime > 20 * 60 * 1000)) {
                 return socket.emit('game_over', { result: 'LOSE', totalHints: team.totalHintsUsed }); // Timeout Loss
             }
 
             // Normalize answer (remove commas, extra spaces, ensure uppercase)
             const cleanAnswer = answer.replace(/,/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
 
-            // Validate based on Phase
-            let correct = false;
-
-            if (phase === 1) {
-                // Phase 1: Hex Sorting (Accepts both Hamming Descending AND Numeric Ascending)
-                // Codes: 0x3F(63, w6), 0xA1(161, w3), 0x09(9, w2), 0xE4(228, w3), 0x8B(139, w4), 0x17(23, w4)
-
-                // Option A: Rule 1 - Hamming Weight Descending
-                // Weights: 6 -> 4,4 -> 3,3 -> 2
-                // Permutations due to ties (8B/17 for w4, E4/A1 for w3)
-                const h1 = "0X3F 0X8B 0X17 0XE4 0XA1 0X09";
-                const h2 = "0X3F 0X8B 0X17 0XA1 0XE4 0X09";
-                const h3 = "0X3F 0X17 0X8B 0XE4 0XA1 0X09";
-                const h4 = "0X3F 0X17 0X8B 0XA1 0XE4 0X09";
-
-                // Option B: Rule 2 - Numeric Ascending (9 -> 23 -> 63 -> 139 -> 161 -> 228)
-                const numeric = "0X09 0X17 0X3F 0X8B 0XA1 0XE4";
-
-                correct = [h1, h2, h3, h4, numeric].includes(cleanAnswer);
-            } else {
-                // Phases 2, 3, 4: Simple String Match
-                correct = ANSWERS[`phase${phase}`] === cleanAnswer.replace(/^0+/, ''); // basic trimming
-            }
+            // Validate Answer
+            const expectedAnswer = ANSWERS[`phase${phase}`]?.toUpperCase();
+            const correct = expectedAnswer === cleanAnswer;
 
             if (correct) {
                 if (team.currentPhase === 4) {
@@ -231,8 +232,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Request Hint (Neural Budget System)
-    // Request Hint (Strict 1 Per Phase, No Cost)
+    // Request Hint (1 Per Phase)
     socket.on('request_hint', async ({ roomCode, currentPhase }) => {
         try {
             const team = await Team.findOne({ roomCode });
@@ -269,7 +269,43 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Request Game State (Sync)
+    // Swap Roles (One-Time Use)
+    socket.on('swap_roles', async ({ roomCode }) => {
+        try {
+            const team = await Team.findOne({ roomCode });
+            if (!team) return socket.emit('error', 'Team not found');
+
+            // Check if already used
+            if (team.roleSwapUsed) {
+                return socket.emit('error', 'Role swap already used');
+            }
+
+            // Perform swap by creating new objects (Mongoose doesn't track reference swaps)
+            const tempA = {
+                socketId: team.playerA.socketId,
+                name: team.playerA.name
+            };
+            const tempB = {
+                socketId: team.playerB.socketId,
+                name: team.playerB.name
+            };
+
+            team.playerA = tempB;
+            team.playerB = tempA;
+            team.roleSwapUsed = true;
+
+            await team.save();
+
+            console.log(`🔄 Role swap executed for Room ${roomCode} (One-time use)`);
+            console.log(`   New PlayerA: ${team.playerA.name} (${team.playerA.socketId})`);
+            console.log(`   New PlayerB: ${team.playerB.name} (${team.playerB.socketId})`);
+
+            io.to(roomCode).emit('game_state_update', team.toObject());
+        } catch (err) {
+            console.error('Error in swap_roles:', err);
+        }
+    });
+
     // Request Game State (Sync)
     socket.on('request_game_state', async (roomCode) => {
         try {

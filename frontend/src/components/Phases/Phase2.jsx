@@ -17,7 +17,11 @@ const Phase2 = ({ role }) => {
                         );
                     })}
                 </div>
-                <div className="mt-8 text-red-400 animate-pulse">⚠️ SECTORS 2 & 5 CORRUPTED</div>
+                <div className="mt-6 text-xs bg-gray-800 border border-gray-600 p-3 rounded">
+                    <span className="text-gray-400">ANSWER FORMAT:</span>
+                    <div className="text-green-400 font-mono mt-1">Integer</div>
+                </div>
+                <div className="mt-4 text-red-400 animate-pulse">⚠️ SECTORS 2 & 5 CORRUPTED</div>
             </div>
         );
     }
@@ -41,11 +45,15 @@ const Phase2 = ({ role }) => {
                     <div className="p-4 border border-red-900 bg-red-900/10">
                         <p className="text-red-400 font-bold">COLLISION PROTOCOL (Quadratic):</p>
                         <p>If Blocked/Occupied -&gt;
-                             Try: <span className="text-white">(Base + n²) % 10</span></p>
+                            Try: <span className="text-white">(Base + n²) % 10</span></p>
                         <p className="text-xs text-gray-400 mt-2">Where n = attempt number (1, 2, 3...)</p>
                     </div>
                 </div>
-                <p className="text-yellow-400">TASK: Submit the FINAL INDEX of the last key (32).</p>
+                <div className="mt-6 text-xs bg-gray-800 border border-gray-600 p-3 rounded">
+                    <span className="text-gray-400">ANSWER FORMAT:</span>
+                    <div className="text-green-400 font-mono mt-1">Integer</div>
+                </div>
+                <p className="text-yellow-400 mt-4">TASK: Submit the FINAL INDEX of the last key (32).</p>
             </div>
         );
     }

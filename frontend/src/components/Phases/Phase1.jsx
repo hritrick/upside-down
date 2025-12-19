@@ -31,7 +31,11 @@ const Phase1 = ({ role }) => {
                         </div>
                     ))}
                 </div>
-                <div className="mt-8 text-xs text-red-400 animate-pulse">
+                <div className="mt-6 text-xs bg-gray-800 border border-gray-600 p-3 rounded">
+                    <span className="text-gray-400">ANSWER FORMAT:</span>
+                    <div className="text-green-400 font-mono mt-1">0xA1 0x3F 0xE4 0x09 0x8B 0x17</div>
+                </div>
+                <div className="mt-4 text-xs text-red-400 animate-pulse">
                     ⚠️ DO NOT ATTEMPT TO DECIPHER ALONE
                 </div>
             </div>
@@ -66,6 +70,11 @@ const Phase1 = ({ role }) => {
                             <li>2. Sort by Value: <span className="text-green-400 font-bold">ASCENDING</span>.</li>
                         </ul>
                     )}
+                </div>
+
+                <div className="mt-6 text-xs bg-gray-800 border border-gray-600 p-3 rounded">
+                    <span className="text-gray-400">ANSWER FORMAT:</span>
+                    <div className="text-green-400 font-mono mt-1">0xA1 0x3F 0xE4 0x09 0x8B 0x17</div>
                 </div>
             </div>
         );

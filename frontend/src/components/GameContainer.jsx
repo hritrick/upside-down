@@ -17,7 +17,7 @@ const GameContainer = () => {
     const [loading, setLoading] = useState(true);
 
     // HUD State
-    const [timeLeft, setTimeLeft] = useState(720);
+    const [timeLeft, setTimeLeft] = useState(1200); // 20 minutes
     const [activeHint, setActiveHint] = useState(null);
     const [hintsExhausted, setHintsExhausted] = useState(false);
 
@@ -25,6 +25,33 @@ const GameContainer = () => {
     const [gameResult, setGameResult] = useState(null); // 'WIN' or 'LOSE'
     const [finalHintCount, setFinalHintCount] = useState(0);
     const [finalDuration, setFinalDuration] = useState(0);
+
+    // Role State (reactive to teamData changes)
+    const [playerRole, setPlayerRole] = useState(null);
+
+    // Update role whenever teamData or socket changes
+    useEffect(() => {
+        console.log('🔄 Role Update Effect Triggered');
+        console.log('Socket ID:', socket?.id);
+        console.log('PlayerA Socket:', teamData?.playerA?.socketId);
+        console.log('PlayerB Socket:', teamData?.playerB?.socketId);
+
+        if (!teamData || !socket) {
+            console.log('❌ No teamData or socket, setting role to null');
+            setPlayerRole(null);
+            return;
+        }
+        if (socket.id === teamData.playerA?.socketId) {
+            console.log('✅ Setting role to A');
+            setPlayerRole('A');
+        } else if (socket.id === teamData.playerB?.socketId) {
+            console.log('✅ Setting role to B');
+            setPlayerRole('B');
+        } else {
+            console.log('❌ Socket ID does not match, setting role to null');
+            setPlayerRole(null);
+        }
+    }, [teamData, socket]);
 
     // 1. Initial Sync & Listeners
     useEffect(() => {
@@ -77,7 +104,7 @@ const GameContainer = () => {
         if (!teamData?.startTime || gameResult) return; // Stop timer if game over
         const interval = setInterval(() => {
             const elapsed = Math.floor((Date.now() - new Date(teamData.startTime).getTime()) / 1000);
-            const remaining = 720 - elapsed;
+            const remaining = 1200 - elapsed; // 20 minutes
             if (remaining <= 0) {
                 // Trigger timeout logic here or wait for server
                 setTimeLeft(0);
@@ -91,12 +118,11 @@ const GameContainer = () => {
     // Helper: Format Time
     const formatTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
-    // Helper: Get Role
-    const getPlayerRole = () => {
-        if (!teamData || !socket) return null;
-        if (socket.id === teamData.playerA.socketId) return 'A';
-        if (socket.id === teamData.playerB.socketId) return 'B';
-        return null;
+    // Handler: Swap Roles
+    const handleSwap = () => {
+        if (!teamData?.roleSwapUsed) {
+            socket.emit('swap_roles', { roomCode });
+        }
     };
 
     // --- RENDER: VICTORY / DEFEAT SCREEN ---
@@ -141,7 +167,19 @@ const GameContainer = () => {
                 <div className={`font-bold tracking-widest ${timeLeft < 120 ? 'text-red-500 animate-pulse' : 'text-green-400'}`}>
                     T-MINUS: {formatTime(timeLeft)}
                 </div>
-                <div className="text-red-500 font-bold">PHASE {currentPhase}/4</div>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={handleSwap}
+                        disabled={teamData?.roleSwapUsed}
+                        className={`px-4 py-1 font-bold font-mono transition-all ${teamData?.roleSwapUsed
+                            ? 'bg-gray-700 text-gray-500 border-2 border-gray-600 cursor-not-allowed'
+                            : 'bg-transparent text-blue-400 border-2 border-blue-500 hover:bg-blue-500 hover:text-black'
+                            }`}
+                    >
+                        {teamData?.roleSwapUsed ? 'SWAP USED' : 'SWAP ROLES'}
+                    </button>
+                    <div className="text-red-500 font-bold">PHASE {currentPhase}/4</div>
+                </div>
             </div>
 
             {/* GAME AREA */}
@@ -153,10 +191,10 @@ const GameContainer = () => {
                 )}
 
                 <div className="w-full max-w-6xl flex justify-center">
-                    {currentPhase === 1 && <Phase1 role={getPlayerRole()} />}
-                    {currentPhase === 2 && <Phase2 role={getPlayerRole()} />}
-                    {currentPhase === 3 && <Phase3 role={getPlayerRole()} />}
-                    {currentPhase === 4 && <Phase4 role={getPlayerRole()} />}
+                    {currentPhase === 1 && <Phase1 role={playerRole} />}
+                    {currentPhase === 2 && <Phase2 role={playerRole} />}
+                    {currentPhase === 3 && <Phase3 role={playerRole} />}
+                    {currentPhase === 4 && <Phase4 role={playerRole} />}
                 </div>
             </div>
 
