@@ -9,7 +9,6 @@ const GameInput = ({ roomCode, currentPhase, onHint, hintsExhausted }) => {
 
     // Audio References (Ensure these files exist in public/sounds/)
     const sfxError = new Audio('/sounds/error.mp3');
-    const sfxLockdown = new Audio('/sounds/lockdown.mp3');
 
     // RESET ON PHASE CHANGE
     useEffect(() => {
