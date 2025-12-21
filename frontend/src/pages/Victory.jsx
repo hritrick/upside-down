@@ -4,7 +4,7 @@ import useGameStore from '../store/GameStore';
 
 const Victory = () => {
     const navigate = useNavigate();
-    const { teamCode, timerSeconds, status, resetGame } = useGameStore();
+    const { teamCode, timerSeconds, status, totalPoints, resetGame } = useGameStore();
 
     const formatTime = (seconds) => {
         const timeSpent = 1200 - seconds; // Calculate time used
@@ -82,6 +82,16 @@ const Victory = () => {
                                     <p className="text-gray-400 text-lg mb-2">COMPLETION TIME</p>
                                     <p className="text-5xl text-green-500 font-bold">
                                         {formatTime(timerSeconds)}
+                                    </p>
+                                </div>
+
+                                <div className="border-t-2 border-gray-700 pt-6">
+                                    <p className="text-gray-400 text-lg mb-2">TOTAL POINTS</p>
+                                    <p className="text-5xl text-green-500 font-bold">
+                                        {totalPoints || 0}
+                                    </p>
+                                    <p className="text-gray-400 text-sm mt-3">
+                                        +5 per phase • -2 per hint • -3 for role swap
                                     </p>
                                 </div>
 

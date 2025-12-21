@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
+import useGameStore from '../store/GameStore';
 import GameInput from './GameInput';
 import Phase1 from './Phases/Phase1';
 import Phase2 from './Phases/Phase2';
@@ -11,6 +12,7 @@ const GameContainer = () => {
     const { roomCode } = useParams();
     const navigate = useNavigate();
     const socket = useSocket();
+    const { setPoints } = useGameStore();
 
     const [currentPhase, setCurrentPhase] = useState(1);
     const [teamData, setTeamData] = useState(null);
@@ -25,6 +27,7 @@ const GameContainer = () => {
     const [gameResult, setGameResult] = useState(null); // 'WIN' or 'LOSE'
     const [finalHintCount, setFinalHintCount] = useState(0);
     const [finalDuration, setFinalDuration] = useState(0);
+    const [finalPoints, setFinalPoints] = useState(0);
 
     // Role State (reactive to teamData changes)
     const [playerRole, setPlayerRole] = useState(null);
@@ -64,25 +67,41 @@ const GameContainer = () => {
             // Check if hint used for this phase
             const used = team.phaseHintCounts && team.phaseHintCounts[String(team.currentPhase)] >= 1;
             setHintsExhausted(used);
+            // Sync points to GameStore
+            if (team.totalPoints !== undefined) {
+                setPoints(team.totalPoints);
+            }
             setLoading(false);
         });
 
-        socket.on('answer_correct', ({ nextPhase }) => {
+        socket.on('answer_correct', ({ nextPhase, totalPoints }) => {
             setCurrentPhase(nextPhase);
             setHintsExhausted(false); // Reset for new phase
             setActiveHint(null);
+            // Update points in GameStore
+            if (totalPoints !== undefined) {
+                setPoints(totalPoints);
+            }
         });
 
-        socket.on('hint_received', ({ hintText }) => {
+        socket.on('hint_received', ({ hintText, totalPoints }) => {
             setActiveHint(hintText);
             setHintsExhausted(true); // Immediate lock
+            // Update points in GameStore
+            if (totalPoints !== undefined) {
+                setPoints(totalPoints);
+            }
         });
 
         // GAME OVER LISTENER
-        socket.on('game_over', ({ result, totalHints, duration }) => {
+        socket.on('game_over', ({ result, totalHints, duration, totalPoints }) => {
             setGameResult(result);
             setFinalHintCount(totalHints);
             if (duration) setFinalDuration(duration);
+            if (totalPoints !== undefined) {
+                setFinalPoints(totalPoints);
+                setPoints(totalPoints); // Sync to GameStore
+            }
         });
 
         socket.on('opponent_left', () => {
@@ -145,6 +164,12 @@ const GameContainer = () => {
                             <div className="text-4xl font-bold tracking-widest">{formatTime(finalDuration)}</div>
                         </div>
                     )}
+
+                    <div className="border-t border-current pt-4 mb-8">
+                        <div className="text-sm opacity-70 mb-2">TOTAL POINTS</div>
+                        <div className="text-5xl font-bold">{finalPoints}</div>
+                        <div className="text-xs opacity-60 mt-2">+5 per phase • -2 per hint • -3 for role swap</div>
+                    </div>
 
                     <button
                         onClick={() => navigate('/')}

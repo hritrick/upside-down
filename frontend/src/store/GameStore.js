@@ -9,27 +9,30 @@ const useGameStore = create((set) => ({
     status: 'idle', // idle, playing, completed, failed
     glitchActive: false,
     stressLevel: 0,
-    
+    totalPoints: 0, // Point tracking
+
     // Actions
     setTeamInfo: (teamCode, playerRole) => set({ teamCode, playerRole }),
-    
+
     setBothPlayersConnected: () => set({ status: 'playing' }), // Assuming this starts the game
-    
+
     // Sync entire game state (e.g. from socket)
     setGameState: (currentPhase, timerSeconds, status) => set({ currentPhase, timerSeconds, status }),
-    
+
     updateTimer: (timerSeconds) => set({ timerSeconds }),
-    
+
     setPhase: (currentPhase) => set({ currentPhase }),
-    
+
     setGameStatus: (status) => set({ status }),
-    
+
     setPartnerDisconnected: () => set({ status: 'failed' }), // Or some other state
-    
+
     activateGlitch: () => set({ glitchActive: true }),
-    
+
     deactivateGlitch: () => set({ glitchActive: false }),
-    
+
+    setPoints: (totalPoints) => set({ totalPoints }),
+
     resetGame: () => set({
         teamCode: null,
         playerRole: null,
@@ -37,7 +40,8 @@ const useGameStore = create((set) => ({
         timerSeconds: 1200,
         status: 'idle',
         glitchActive: false,
-        stressLevel: 0
+        stressLevel: 0,
+        totalPoints: 0
     })
 }));
 

@@ -13,6 +13,7 @@ const TeamSchema = new mongoose.Schema({
     // Stats
     totalHintsUsed: { type: Number, default: 0 },
     phaseHintCounts: { type: Map, of: Number, default: {} }, // Tracks per-phase usage
+    totalPoints: { type: Number, default: 0 }, // Point tracking
 
     lockdownUntil: { type: Number, default: 0 },
     roleSwapUsed: { type: Boolean, default: false } // Track one-time role swap

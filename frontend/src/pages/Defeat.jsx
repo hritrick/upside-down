@@ -4,7 +4,7 @@ import useGameStore from '../store/GameStore';
 
 const Defeat = () => {
     const navigate = useNavigate();
-    const { teamCode, resetGame } = useGameStore();
+    const { teamCode, totalPoints, resetGame } = useGameStore();
 
     const handleTryAgain = () => {
         resetGame();
@@ -58,6 +58,16 @@ const Defeat = () => {
                             <p className="text-gray-400 text-lg mb-2">TEAM CODE</p>
                             <p className="text-4xl text-gate-light font-bold tracking-widest">
                                 {teamCode || '####'}
+                            </p>
+                        </div>
+
+                        <div className="border-t-2 border-red-900/50 pt-6">
+                            <p className="text-gray-400 text-lg mb-2">TOTAL POINTS</p>
+                            <p className="text-4xl text-gate-light font-bold">
+                                {totalPoints || 0}
+                            </p>
+                            <p className="text-gray-500 text-sm mt-3">
+                                +5 per phase • -2 per hint • -3 for role swap
                             </p>
                         </div>
 

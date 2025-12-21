@@ -171,7 +171,8 @@ io.on('connection', (socket) => {
                     await checkTeam.save();
                     io.to(targetCode).emit('game_over', {
                         result: 'LOSE',
-                        totalHints: checkTeam.totalHintsUsed
+                        totalHints: checkTeam.totalHintsUsed,
+                        totalPoints: checkTeam.totalPoints || 0
                     });
                 }
             }, 20 * 60 * 1000); // 20 minutes
@@ -196,7 +197,11 @@ io.on('connection', (socket) => {
 
             // Check Game Over Timeout (20 Minutes)
             if (team.startTime && (Date.now() - team.startTime > 20 * 60 * 1000)) {
-                return socket.emit('game_over', { result: 'LOSE', totalHints: team.totalHintsUsed }); // Timeout Loss
+                return socket.emit('game_over', {
+                    result: 'LOSE',
+                    totalHints: team.totalHintsUsed,
+                    totalPoints: team.totalPoints || 0
+                }); // Timeout Loss
             }
 
             // Normalize answer (remove commas, extra spaces, ensure uppercase)
@@ -207,6 +212,9 @@ io.on('connection', (socket) => {
             const correct = expectedAnswer === cleanAnswer;
 
             if (correct) {
+                // Award +5 points for completing a phase
+                team.totalPoints = (team.totalPoints || 0) + 5;
+
                 if (team.currentPhase === 4) {
                     // VICTORY CONDITION
                     team.status = 'win';
@@ -215,12 +223,16 @@ io.on('connection', (socket) => {
                     io.to(roomCode).emit('game_over', {
                         result: 'WIN',
                         totalHints: team.totalHintsUsed,
+                        totalPoints: team.totalPoints,
                         duration
                     });
                 } else {
                     team.currentPhase += 1;
                     await team.save();
-                    io.to(roomCode).emit('answer_correct', { nextPhase: team.currentPhase });
+                    io.to(roomCode).emit('answer_correct', {
+                        nextPhase: team.currentPhase,
+                        totalPoints: team.totalPoints
+                    });
                 }
             } else {
                 team.lockdownUntil = Date.now() + 30000; // 30s penalty
@@ -251,6 +263,10 @@ io.on('connection', (socket) => {
             // Update Stats
             team.totalHintsUsed = (team.totalHintsUsed || 0) + 1; // Ensure totalHintsUsed is initialized
             team.phaseHintCounts.set(phaseStr, usedInPhase + 1);
+
+            // Deduct -2 points for using a hint
+            team.totalPoints = (team.totalPoints || 0) - 2;
+
             await team.save();
 
             // Get Hint Text
@@ -260,7 +276,8 @@ io.on('connection', (socket) => {
 
             io.to(roomCode).emit('hint_received', {
                 hintText,
-                hintsExhausted: true // Disable button immediately
+                hintsExhausted: true, // Disable button immediately
+                totalPoints: team.totalPoints
             });
             console.log(`💡 Hint served to ${roomCode} (Phase ${currentPhase})`);
 
@@ -294,13 +311,19 @@ io.on('connection', (socket) => {
             team.playerB = tempA;
             team.roleSwapUsed = true;
 
+            // Deduct -3 points for swapping roles
+            team.totalPoints = (team.totalPoints || 0) - 3;
+
             await team.save();
 
             console.log(`🔄 Role swap executed for Room ${roomCode} (One-time use)`);
             console.log(`   New PlayerA: ${team.playerA.name} (${team.playerA.socketId})`);
             console.log(`   New PlayerB: ${team.playerB.name} (${team.playerB.socketId})`);
 
-            io.to(roomCode).emit('game_state_update', team.toObject());
+            io.to(roomCode).emit('game_state_update', {
+                ...team.toObject(),
+                totalPoints: team.totalPoints
+            });
         } catch (err) {
             console.error('Error in swap_roles:', err);
         }
