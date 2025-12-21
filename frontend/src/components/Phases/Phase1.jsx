@@ -1,21 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 const Phase1 = ({ role }) => {
-    const [ruleState, setRuleState] = useState(1);
-    const [timer, setTimer] = useState(30);
-
-    // Local timer for visual flair (The real logic is in the players' heads)
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTimer((prev) => (prev > 0 ? prev - 1 : 30));
-        }, 1000);
-
-        // Toggle rule every 30s visually for Player B
-        if (timer === 0) {
-            setRuleState((prev) => (prev === 1 ? 2 : 1));
-        }
-        return () => clearInterval(interval);
-    }, [timer]);
 
     // --- VIEW FOR PLAYER A (THE EYES) ---
     if (role === 'A') {
@@ -48,28 +33,15 @@ const Phase1 = ({ role }) => {
             <div className="p-6 border-2 border-purple-500 rounded-lg w-full max-w-2xl text-center">
                 <h2 className="text-3xl text-purple-500 font-bold mb-4 tracking-widest">DECRYPTION PROTOCOL</h2>
 
-                <div className="mb-6">
-                    <span className="text-gray-400">RULE CHANGE IN:</span>
-                    <div className="text-5xl font-mono text-white mt-2">{timer}s</div>
-                </div>
-
-                <div className="bg-gray-900 p-6 rounded border border-purple-700">
+                <div className="bg-gray-900 p-6 rounded border border-purple-700 mt-6">
                     <h3 className="text-xl text-green-400 mb-4 font-bold border-b border-gray-700 pb-2">
-                        ACTIVE RULE: {ruleState === 1 ? 'HAMMING WEIGHT' : 'NUMERIC VALUE'}
+                        ACTIVE RULE: NUMERIC VALUE
                     </h3>
 
-                    {ruleState === 1 ? (
-                        <ul className="text-left space-y-3 text-sm font-mono text-gray-300">
-                            <li>1. Convert HEX to BINARY.</li>
-                            <li>2. Count the number of 1s (Hamming Weight).</li>
-                            <li>3. Sort by Count: <span className="text-red-400 font-bold">DESCENDING</span>.</li>
-                        </ul>
-                    ) : (
-                        <ul className="text-left space-y-3 text-sm font-mono text-gray-300">
-                            <li>1. Convert HEX to DECIMAL.</li>
-                            <li>2. Sort by Value: <span className="text-green-400 font-bold">ASCENDING</span>.</li>
-                        </ul>
-                    )}
+                    <ul className="text-left space-y-3 text-sm font-mono text-gray-300">
+                        <li>1. Convert HEX to DECIMAL.</li>
+                        <li>2. Sort by Value: <span className="text-green-400 font-bold">ASCENDING</span>.</li>
+                    </ul>
                 </div>
 
                 <div className="mt-6 text-xs bg-gray-800 border border-gray-600 p-3 rounded">
