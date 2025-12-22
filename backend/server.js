@@ -40,7 +40,7 @@ const ANSWERS = {
     phase1: "0x09 0x17 0x3F 0x8B 0xA1 0xE4",
     phase2: "1",
     phase3: "20",
-    phase4: "19"
+    phase4: "21"
 };
 
 // 6. Hint Data Dictionary
