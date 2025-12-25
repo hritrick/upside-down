@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 const SocketContext = createContext(null);
 
 // Initialize Socket.io client
-const socket = io('http://localhost:5001', {
+const socket = io('https://upside-down.onrender.com', {
     withCredentials: true,
     transports: ['websocket', 'polling']
 });
