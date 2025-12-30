@@ -1,7 +1,7 @@
 {
-    "name": "panic-grocery-run-backend",
+    "name": "upside-down-server",
     "version": "1.0.0",
-    "description": "Backend for Panic Grocery Run - A cooperative multiplayer algorithm game",
+    "description": "Backend for Upside Down - A cooperative multiplayer algorithm game",
     "main": "server.js",
     "type": "module",
     "scripts": {
