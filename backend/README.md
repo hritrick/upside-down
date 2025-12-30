@@ -18,7 +18,7 @@ cp .env.example .env
 Edit `.env`:
 ```
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/panic-grocery-run
+MONGODB_URI=mongodb+srv://admin:<db_password>@hawkinslab.dujlzzt.mongodb.net/?appName=HawkinsLab
 NODE_ENV=development
 ```
 

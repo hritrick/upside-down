@@ -17,6 +17,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://the-upside-down.vercel.app",
     process.env.FRONTEND_URL, // Production frontend URL
 ].filter(Boolean); // Remove undefined values
 
