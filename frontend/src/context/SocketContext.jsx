@@ -4,13 +4,17 @@ import { io } from 'socket.io-client';
 const SocketContext = createContext(null);
 
 // Initialize Socket.io client
-const socket = io('https://upside-down.onrender.com', {
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://upside-down.onrender.com';
+
+const socket = io(BACKEND_URL, {
     withCredentials: true,
     transports: ['websocket', 'polling']
 });
 
 export const SocketProvider = ({ children }) => {
     useEffect(() => {
+        console.log('🌐 Connecting to backend:', BACKEND_URL);
+
         socket.on('connect', () => {
             console.log('🔌 Connected to server:', socket.id);
         });

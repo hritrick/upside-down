@@ -14,22 +14,40 @@ const app = express();
 const server = http.createServer(app);
 
 // 2. CORS & Middleware
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    process.env.FRONTEND_URL, // Production frontend URL
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
 }));
 app.use(express.json());
 
 // 3. Database Connection
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI)
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+if (!MONGODB_URI) {
+    console.error('❌ CRITICAL ERROR: MONGODB_URI environment variable is not set!');
+    console.error('Please set MONGODB_URI in your environment variables.');
+    process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
     .then(() => console.log('✅ MongoDB Connected'))
-    .catch((err) => console.error('❌ MongoDB Error:', err));
+    .catch((err) => {
+        console.error('❌ MongoDB Connection Error:', err);
+        console.error('Connection String:', MONGODB_URI.replace(/\/\/.*:.*@/, '//***:***@')); // Hide credentials in logs
+        process.exit(1);
+    });
 
 // 4. Socket.io Setup
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+        origin: allowedOrigins,
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -73,13 +91,13 @@ function generatePhase4Puzzle() {
         ['f', 'g', 4]
     ];
 
-    // Static Mission: Solution is hardcoded to 19 (User Request)
+    // Static Mission: Solution is hardcoded to 21 (User Request)
     return {
         nodes,
         edges,
         startNode: 'MST',
         endNode: 'MST',
-        solution: 19
+        solution: 21
     };
 }
 
