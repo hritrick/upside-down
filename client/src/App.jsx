@@ -4,7 +4,7 @@ import Lobby from './pages/Lobby';
 import GameContainer from './components/GameContainer';
 import Victory from './pages/Victory';
 import Defeat from './pages/Defeat';
-import './index.css';
+import './styles/index.css';
 
 function App() {
     return (

@@ -13,14 +13,11 @@ const socket = io(BACKEND_URL, {
 
 export const SocketProvider = ({ children }) => {
     useEffect(() => {
-        console.log('🌐 Connecting to backend:', BACKEND_URL);
 
         socket.on('connect', () => {
-            console.log('🔌 Connected to server:', socket.id);
         });
 
         socket.on('disconnect', () => {
-            console.log('🔌 Disconnected from server');
         });
 
         socket.on('connect_error', (error) => {

@@ -1,119 +1,13 @@
-// server.js - FINAL STABLE VERSION
-import express from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import Team from './models/Team.js';
+import Team from '../models/Team.js';
+import { ANSWERS, HINT_DATA, generatePhase4Puzzle } from '../utils/gameLogic.js';
 
-dotenv.config();
-
-// 1. App & Server Setup
-const app = express();
-const server = http.createServer(app);
-
-// 2. CORS & Middleware
-const allowedOrigins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://the-upside-down.vercel.app",
-    process.env.FRONTEND_URL, // Production frontend URL
-].filter(Boolean); // Remove undefined values
-
-app.use(cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true
-}));
-app.use(express.json());
-
-// 3. Database Connection
-const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
-
-if (!MONGODB_URI) {
-    console.error('❌ CRITICAL ERROR: MONGODB_URI environment variable is not set!');
-    console.error('Please set MONGODB_URI in your environment variables.');
-    process.exit(1);
-}
-
-mongoose.connect(MONGODB_URI)
-    .then(() => console.log('✅ MongoDB Connected'))
-    .catch((err) => {
-        console.error('❌ MongoDB Connection Error:', err);
-        console.error('Connection String:', MONGODB_URI.replace(/\/\/.*:.*@/, '//***:***@')); // Hide credentials in logs
-        process.exit(1);
-    });
-
-// 4. Socket.io Setup
-const io = new Server(server, {
-    cors: {
-        origin: allowedOrigins,
-        methods: ["GET", "POST"],
-        credentials: true
-    }
-});
-
-// 5. Game Logic & Validation Answers
-const ANSWERS = {
-    phase1: "0x09 0x17 0x3F 0x8B 0xA1 0xE4",
-    phase2: "1",
-    phase3: "20",
-    phase4: "21"
-};
-
-// 6. Hint Data Dictionary
-const HINT_DATA = {
-    1: [
-        "DECIMAL VALUES: 0x09=9, 0xE4=228, 0x17=23, 0x8B=139, 0xA1=161, 0x3F=63", // Full Decimal List
-    ],
-    2: [
-        "Index 2 is blocked. The first collision (Key 42) must move to (2 + 1²) = Index 3."
-    ],
-    3: [
-        "Preorder: Root->Left->Right. Inorder: Left->Root->Right. The Root Node is 50."
-    ],
-    4: [
-        "Total number of nodes - 1 = Number of edges required for MST."
-    ]
-};
-
-
-// Phase 4: Fixed Dijkstra Graph Generator
-function generatePhase4Puzzle() {
-    // FIXED GRAPH - Matches user diagram exactly
-    const nodes = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
-    const edges = [
-        ['a', 'b', 5], ['a', 'c', 3],
-        ['b', 'c', 4], ['b', 'd', 6], ['b', 'e', 2],
-        ['c', 'd', 5], ['c', 'f', 6],
-        ['d', 'e', 6], ['d', 'f', 6],
-        ['e', 'f', 3], ['e', 'g', 5],
-        ['f', 'g', 4]
-    ];
-
-    // Static Mission: Solution is hardcoded to 21 (User Request)
-    return {
-        nodes,
-        edges,
-        startNode: 'MST',
-        endNode: 'MST',
-        solution: 21
-    };
-}
-
-// 7. Socket Events
-io.on('connection', (socket) => {
+export default function registerSocketHandlers(io, socket) {
     console.log(`🔌 Connected: ${socket.id}`);
 
     // Create Team
     socket.on('create_team', async (playerName) => {
-        console.log(`📨 RECEIVED 'create_team' from ${socket.id}`); // Debug Log 4
-        console.log(`📋 Player Name: ${playerName}`);
-
         try {
             const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-            console.log(`🎲 Generated roomCode: ${roomCode}`);
 
             const phase4Puzzle = generatePhase4Puzzle(); // Generate Static Phase 4
 
@@ -127,15 +21,11 @@ io.on('connection', (socket) => {
             });
 
             await newTeam.save();
-            console.log(`💾 Team saved to database`);
 
             socket.roomCode = roomCode; // Store for disconnect handling
             socket.join(roomCode);
-            console.log(`🚪 Socket joined room: ${roomCode}`);
 
             socket.emit('team_created', { roomCode, role: 'A' });
-            console.log(`📤 SENT 'team_created' back to client`); // Debug Log 5
-            console.log(`✨ Team ${roomCode} created by ${playerName}`);
         } catch (err) {
             console.error("💥 ERROR inside create_team:", err);
             socket.emit('error', 'Creation failed');
@@ -145,27 +35,18 @@ io.on('connection', (socket) => {
 
     // Join Team
     socket.on('join_team', async ({ roomCode, playerName }) => {
-        console.log(`📥 ATTEMPT JOIN: Room="${roomCode}" (Type: ${typeof roomCode}), Player="${playerName}"`);
-
         try {
             // FORCE STRING COMPARISON just in case
             const targetCode = String(roomCode).trim();
 
             const team = await Team.findOne({ roomCode: targetCode });
 
-            // LOG WHAT WE FOUND
             if (!team) {
-                console.log(`❌ FAIL: Team with code ${targetCode} NOT FOUND in DB.`);
                 return socket.emit('error', 'Team not found');
             }
 
-            console.log(`🔍 FOUND TEAM: ${team.teamName}`);
-            console.log(`   Player A: ${team.playerA?.name} (${team.playerA?.socketId})`);
-            console.log(`   Player B: ${team.playerB?.name} (${team.playerB?.socketId})`);
-
             // CHECK IF FULL
             if (team.playerB && team.playerB.socketId) {
-                console.log(`❌ FAIL: Team is already full.`);
                 return socket.emit('error', 'Room full');
             }
 
@@ -179,13 +60,11 @@ io.on('connection', (socket) => {
 
             socket.join(targetCode);
             io.to(targetCode).emit('game_start', { team });
-            console.log(`✅ SUCCESS: ${playerName} joined Room ${targetCode}`);
 
             // START SERVER SIDE TIMER (20 Minutes)
             setTimeout(async () => {
                 const checkTeam = await Team.findOne({ roomCode: targetCode });
                 if (checkTeam && checkTeam.status === 'playing') {
-                    console.log(`⏰ TIME UP for Room ${targetCode}`);
                     checkTeam.status = 'lose';
                     await checkTeam.save();
                     io.to(targetCode).emit('game_over', {
@@ -298,7 +177,6 @@ io.on('connection', (socket) => {
                 hintsExhausted: true, // Disable button immediately
                 totalPoints: team.totalPoints
             });
-            console.log(`💡 Hint served to ${roomCode} (Phase ${currentPhase})`);
 
         } catch (err) {
             console.error(err);
@@ -335,9 +213,6 @@ io.on('connection', (socket) => {
 
             await team.save();
 
-            console.log(`🔄 Role swap executed for Room ${roomCode} (One-time use)`);
-            console.log(`   New PlayerA: ${team.playerA.name} (${team.playerA.socketId})`);
-            console.log(`   New PlayerB: ${team.playerB.name} (${team.playerB.socketId})`);
 
             io.to(roomCode).emit('game_state_update', {
                 ...team.toObject(),
@@ -363,7 +238,6 @@ io.on('connection', (socket) => {
                     ...team.toObject(),
                     hintsExhausted: used >= 1
                 });
-                console.log(`🔄 State synced for Room ${roomCode}`);
             }
         } catch (err) {
             console.error("Sync error:", err);
@@ -371,9 +245,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', async () => {
-        console.log(`❌ Disconnected: ${socket.id}`);
         if (socket.roomCode) {
-            console.log(`⚠️ Player disconnected from Room ${socket.roomCode}`);
             // Notify the room
             io.to(socket.roomCode).emit('opponent_left');
 
@@ -388,10 +260,4 @@ io.on('connection', (socket) => {
             }
         }
     });
-});
-
-// 7. Start Server
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`SERVER RUNNING ON PORT ${PORT}`);
-});
+}

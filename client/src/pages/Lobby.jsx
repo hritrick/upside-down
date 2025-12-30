@@ -20,7 +20,6 @@ function Lobby() {
 
         // Listen for team created response
         socket.on('team_created', (data) => {
-            console.log("✅ SERVER RESPONDED: Team Created!", data); // Debug Log 3
             setTeamInfo(data.roomCode, data.role);
             setCreatedTeamCode(data.roomCode);
             setError('');
@@ -28,13 +27,11 @@ function Lobby() {
 
         // Listen for game start (when joining a team)
         socket.on('game_start', (data) => {
-            console.log("🚀 GAME START EVENT RECEIVED:", data);
 
             // 1. SAFEGUARD: Extract roomCode correctly
             const roomCode = data.team?.roomCode || data.roomCode;
 
             if (roomCode) {
-                console.log(`✅ Navigating to /game/${roomCode}`);
                 setSyncing(true);
                 setShowJoinModal(false);
                 setError('');
@@ -76,7 +73,6 @@ function Lobby() {
     }, [socket, navigate, setBothPlayersConnected, setGameState]);
 
     const handleCreateTeam = () => {
-        console.log("🖱️ BUTTON CLICKED: Attempting to create team..."); // Debug Log 1
 
         if (!socket) {
             console.error("❌ Socket is undefined!");
@@ -85,7 +81,6 @@ function Lobby() {
 
         // Emit the event with a distinct payload
         socket.emit('create_team', 'Player A');
-        console.log("📡 EVENT EMITTED: 'create_team'"); // Debug Log 2
     };
 
     const handleJoinTeam = () => {
@@ -100,7 +95,6 @@ function Lobby() {
         }
 
         // Debug Log
-        console.log(`📤 SENDING JOIN REQUEST: Code=[${joinCode}] Name=[Player B]`);
 
         // Ensure roomCode is a string - match backend event format
         socket.emit('join_team', {

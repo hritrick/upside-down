@@ -34,24 +34,16 @@ const GameContainer = () => {
 
     // Update role whenever teamData or socket changes
     useEffect(() => {
-        console.log('🔄 Role Update Effect Triggered');
-        console.log('Socket ID:', socket?.id);
-        console.log('PlayerA Socket:', teamData?.playerA?.socketId);
-        console.log('PlayerB Socket:', teamData?.playerB?.socketId);
 
         if (!teamData || !socket) {
-            console.log('❌ No teamData or socket, setting role to null');
             setPlayerRole(null);
             return;
         }
         if (socket.id === teamData.playerA?.socketId) {
-            console.log('✅ Setting role to A');
             setPlayerRole('A');
         } else if (socket.id === teamData.playerB?.socketId) {
-            console.log('✅ Setting role to B');
             setPlayerRole('B');
         } else {
-            console.log('❌ Socket ID does not match, setting role to null');
             setPlayerRole(null);
         }
     }, [teamData, socket]);

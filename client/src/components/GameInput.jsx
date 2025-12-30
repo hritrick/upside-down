@@ -36,7 +36,6 @@ const GameInput = ({ roomCode, currentPhase, onHint, hintsExhausted }) => {
         if (!socket) return;
 
         socket.on('answer_incorrect', () => {
-            console.log("❌ WRONG ANSWER: Locking terminal...");
             sfxError.play().catch(() => { }); // Catch play errors
             setAnswer(''); // Clear input
             setIsLocked(true);
@@ -44,7 +43,6 @@ const GameInput = ({ roomCode, currentPhase, onHint, hintsExhausted }) => {
         });
 
         socket.on('error_locked', ({ timeLeft }) => {
-            console.log(`🔒 ALREADY LOCKED: ${timeLeft}s remaining`);
             sfxLockdown.play().catch(() => { });
             setIsLocked(true);
             setLockdownTimer(timeLeft);
@@ -59,7 +57,6 @@ const GameInput = ({ roomCode, currentPhase, onHint, hintsExhausted }) => {
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent page reload
 
-        console.log("🖱️ EXECUTE CLICKED");
 
         if (!answer.trim()) {
             console.warn("⚠️ Input is empty");
@@ -74,7 +71,6 @@ const GameInput = ({ roomCode, currentPhase, onHint, hintsExhausted }) => {
             return;
         }
 
-        console.log(`📡 SENDING ANSWER: "${answer}" for Phase ${currentPhase}`);
 
         // Emit to Server
         socket.emit('submit_answer', {
