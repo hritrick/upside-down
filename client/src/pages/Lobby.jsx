@@ -14,6 +14,7 @@ function Lobby() {
     const [createdTeamCode, setCreatedTeamCode] = useState(null);
     const [error, setError] = useState('');
     const [syncing, setSyncing] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         if (!socket) return;
@@ -22,6 +23,7 @@ function Lobby() {
         socket.on('team_created', (data) => {
             setTeamInfo(data.roomCode, data.role);
             setCreatedTeamCode(data.roomCode);
+            setIsGenerating(false);
             setError('');
         });
 
@@ -50,6 +52,7 @@ function Lobby() {
         socket.on('error', (err) => {
             console.error("❌ SERVER ERROR:", err);
             setError(err);
+            setIsGenerating(false);
         });
 
         // Listen for both players connected
@@ -78,6 +81,9 @@ function Lobby() {
             console.error("❌ Socket is undefined!");
             return;
         }
+
+        setIsGenerating(true);
+        setError('');
 
         // Emit the event with a distinct payload
         socket.emit('create_team', 'Player A');
@@ -187,23 +193,36 @@ function Lobby() {
                 {/* Action Buttons */}
                 {!createdTeamCode && (
                     <div className="flex flex-col gap-6 items-center">
-                        <motion.button
-                            whileHover={{ scale: 1.05, boxShadow: '0 0 30px #ff0000' }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleCreateTeam}
-                            className="px-12 py-4 bg-gate border-2 border-gate text-white text-2xl font-mono tracking-wider rounded-lg shadow-[0_0_15px_#8B0000] hover:bg-gate-light transition-all"
-                        >
-                            CREATE TEAM
-                        </motion.button>
+                        {isGenerating ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                                className="px-12 py-4 text-gate text-2xl font-mono tracking-widest border-2 border-gate/30 rounded-lg bg-gate/5"
+                            >
+                                GENERATING TEAM CODE...
+                            </motion.div>
+                        ) : (
+                            <>
+                                <motion.button
+                                    whileHover={{ scale: 1.05, boxShadow: '0 0 30px #ff0000' }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleCreateTeam}
+                                    className="px-12 py-4 bg-gate border-2 border-gate text-white text-2xl font-mono tracking-wider rounded-lg shadow-[0_0_15px_#8B0000] hover:bg-gate-light transition-all"
+                                >
+                                    CREATE TEAM
+                                </motion.button>
 
-                        <motion.button
-                            whileHover={{ scale: 1.05, boxShadow: '0 0 30px #6A0DAD' }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setShowJoinModal(true)}
-                            className="px-12 py-4 bg-mindflayer border-2 border-mindflayer text-white text-2xl font-mono tracking-wider rounded-lg shadow-[0_0_15px_#6A0DAD] hover:bg-mindflayer-light transition-all"
-                        >
-                            JOIN TEAM
-                        </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05, boxShadow: '0 0 30px #6A0DAD' }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setShowJoinModal(true)}
+                                    className="px-12 py-4 bg-mindflayer border-2 border-mindflayer text-white text-2xl font-mono tracking-wider rounded-lg shadow-[0_0_15px_#6A0DAD] hover:bg-mindflayer-light transition-all"
+                                >
+                                    JOIN TEAM
+                                </motion.button>
+                            </>
+                        )}
                     </div>
                 )}
 
